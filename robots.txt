@@ -1,1 +1,1 @@
-Sitemap: https://waltherg.github.io/georgio_fastpages/sitemap.xml
+Sitemap: https://georg.io/sitemap.xml

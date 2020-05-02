@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>The Crank-Nicolson method implemented from scratch in Python | georg.io</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="The Crank-Nicolson method implemented from scratch in Python" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this article we implement the well-known finite difference method Crank-Nicolson in Python." />
+<meta property="og:description" content="In this article we implement the well-known finite difference method Crank-Nicolson in Python." />
+<link rel="canonical" href="https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html" />
+<meta property="og:url" content="https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html" />
+<meta property="og:site_name" content="georg.io" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2013-12-03T00:00:00-06:00" />
+<script type="application/ld+json">
+{"description":"In this article we implement the well-known finite difference method Crank-Nicolson in Python.","mainEntityOfPage":{"@type":"WebPage","@id":"https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html"},"@type":"BlogPosting","url":"https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html","headline":"The Crank-Nicolson method implemented from scratch in Python","dateModified":"2013-12-03T00:00:00-06:00","datePublished":"2013-12-03T00:00:00-06:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://georg.io/feed.xml" title="georg.io" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-45212489-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>The Crank-Nicolson method implemented from scratch in Python | georg.io</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="The Crank-Nicolson method implemented from scratch in Python" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this article we implement the well-known finite difference method Crank-Nicolson in Python." />
+<meta property="og:description" content="In this article we implement the well-known finite difference method Crank-Nicolson in Python." />
+<link rel="canonical" href="https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html" />
+<meta property="og:url" content="https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html" />
+<meta property="og:site_name" content="georg.io" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2013-12-03T00:00:00-06:00" />
+<script type="application/ld+json">
+{"description":"In this article we implement the well-known finite difference method Crank-Nicolson in Python.","mainEntityOfPage":{"@type":"WebPage","@id":"https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html"},"@type":"BlogPosting","url":"https://georg.io/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html","headline":"The Crank-Nicolson method implemented from scratch in Python","dateModified":"2013-12-03T00:00:00-06:00","datePublished":"2013-12-03T00:00:00-06:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://georg.io/feed.xml" title="georg.io" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-45212489-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+<script type="text/javascript">
+require.config({
+  paths: {
+    jquery: 'https://code.jquery.com/jquery-3.5.0.min',
+    plotly: 'https://cdn.plot.ly/plotly-latest.min'
+  },
+
+  shim: {
+    plotly: {
+      deps: ['jquery'],
+      exports: 'plotly'
+    }
+  }
+});
+</script>
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">georg.io</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">The Crank-Nicolson method implemented from scratch in Python</h1><p class="page-description">In this article we implement the well-known finite difference method Crank-Nicolson in Python.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2013-12-03T00:00:00-06:00" itemprop="datePublished">
+        Dec 3, 2013
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      13 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#numpy">numpy</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#numerical analysis">numerical analysis</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#partial differential equations">partial differential equations</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/waltherg/georgio_fastpages/tree/master/_notebooks/2013-12-03-Crank_Nicolson.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/waltherg/georgio_fastpages/master?filepath=_notebooks%2F2013-12-03-Crank_Nicolson.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/waltherg/georgio_fastpages/blob/master/_notebooks/2013-12-03-Crank_Nicolson.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#The-Crank-Nicolson-Method">The Crank-Nicolson Method </a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#Finite-Difference-Methods">Finite Difference Methods </a></li>
+<li class="toc-entry toc-h2"><a href="#The-Crank-Nicolson-Stencil">The Crank-Nicolson Stencil </a></li>
+<li class="toc-entry toc-h2"><a href="#Reordering-Stencil-into-Linear-System">Reordering Stencil into Linear System </a></li>
+<li class="toc-entry toc-h2"><a href="#A-Crank-Nicolson-Example-in-Python">A Crank-Nicolson Example in Python </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Import-Packages">Import Packages </a></li>
+<li class="toc-entry toc-h3"><a href="#Specify-Grid">Specify Grid </a></li>
+<li class="toc-entry toc-h3"><a href="#Specify-System-Parameters-and-the-Reaction-Term">Specify System Parameters and the Reaction Term </a></li>
+<li class="toc-entry toc-h3"><a href="#Specify-the-Initial-Condition">Specify the Initial Condition </a></li>
+<li class="toc-entry toc-h3"><a href="#Create-Matrices">Create Matrices </a></li>
+<li class="toc-entry toc-h3"><a href="#Solve-the-System-Iteratively">Solve the System Iteratively </a></li>
+<li class="toc-entry toc-h3"><a href="#Plot-the-Numerical-Solution">Plot the Numerical Solution </a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2013-12-03-Crank_Nicolson.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="The-Crank-Nicolson-Method">
+<a class="anchor" href="#The-Crank-Nicolson-Method" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Crank-Nicolson Method<a class="anchor-link" href="#The-Crank-Nicolson-Method"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <a href="http://en.wikipedia.org/wiki/Crank%E2%80%93Nicolson_method">Crank-Nicolson method</a> is a well-known finite difference method for the
+numerical integration of the heat equation and closely related partial differential equations.</p>
+<p>We often resort to a Crank-Nicolson (CN) scheme when we integrate numerically reaction-diffusion systems in one space dimension</p>
+<p>
+$$\frac{\partial u}{\partial t} = D \frac{\partial^2 u}{\partial x^2} + f(u),$$
+</p>
+<p>
+$$\frac{\partial u}{\partial x}\Bigg|_{x = 0, L} = 0,$$
+</p>
+<p>where $u$ is our concentration variable, $x$ is the space variable, $D$ is the diffusion coefficient of $u$, $f$ is the reaction term,
+and $L$ is the length of our one-dimensional space domain.</p>
+<p>Note that we use <a href="http://en.wikipedia.org/wiki/Neumann_boundary_condition">Neumann boundary conditions</a> and specify that the solution
+$u$ has zero space slope at the boundaries, effectively prohibiting entrance or exit of material at the boundaries (no-flux boundary conditions).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Finite-Difference-Methods">
+<a class="anchor" href="#Finite-Difference-Methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Finite Difference Methods<a class="anchor-link" href="#Finite-Difference-Methods"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Many fantastic textbooks and tutorials have been written about finite difference methods, for instance a free textbook by
+<a href="http://people.maths.ox.ac.uk/trefethen/pdetext.html">Lloyd Trefethen</a>.</p>
+<p>Here we describe a few basic aspects of finite difference methods.</p>
+<p>The above reaction-diffusion equation describes the time evolution of variable $u(x,t)$ in one space dimension ($u$ is a line concentration).
+If we knew an analytic expression for $u(x,t)$ then we could plot $u$ in a two-dimensional coordinate system with axes $t$ and $x$.</p>
+<p>To approximate $u(x,t)$ numerically we discretize this two-dimensional coordinate system resulting, in the simplest case, in a
+two-dimensional <a href="http://en.wikipedia.org/wiki/Regular_grid">regular grid</a>.
+This picture is employed commonly when constructing finite differences methods, see for instance 
+<a href="http://people.maths.ox.ac.uk/trefethen/3all.pdf">Figure 3.2.1 of Trefethen</a>.</p>
+<p>Let us discretize both time and space as follows:</p>
+<p>
+$$t_n = n \Delta t,~ n = 0, \ldots, N-1,$$
+</p>
+<p>
+$$x_j = j \Delta x,~ j = 0, \ldots, J-1,$$
+</p>
+<p>where $N$ and $J$ are the number of discrete time and space points in our grid respectively.
+$\Delta t$ and $\Delta x$ are the time step and space step respectively and defined as follows:</p>
+<p>
+$$\Delta t = T / N,$$
+</p>
+<p>
+$$\Delta x = L / J,$$
+</p>
+<p>where $T$ is the point in time up to which we will integrate $u$ numerically.</p>
+<p>Our ultimate goal is to construct a numerical method that allows us to approximate the unknonwn analytic solution $u(x,t)$
+reasonably well in these discrete grid points.</p>
+<p>That is we want construct a method that computes values $U(j \Delta x, n \Delta t)$ (note: capital $U$) so that</p>
+<p>
+$$U(j \Delta x, n \Delta t) \approx u(j \Delta x, n \Delta t)$$
+</p>
+<p>As a shorthand we will write $U_j^n = U(j \Delta x, n \Delta t)$ and $(j,n)$ to refer to grid point $(j \Delta x, n \Delta t)$.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="The-Crank-Nicolson-Stencil">
+<a class="anchor" href="#The-Crank-Nicolson-Stencil" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Crank-Nicolson Stencil<a class="anchor-link" href="#The-Crank-Nicolson-Stencil"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Based on the two-dimensional grid we construct we then approximate the operators of our reaction-diffusion system.</p>
+<p>For instance, to approximate the time derivative on the left-hand side in grid point $(j,n)$ we use the values of $U$ in two specific grid points:</p>
+<p>
+$$\frac{\partial u}{\partial t}\Bigg|_{x = j \Delta x, t = n \Delta t} \approx \frac{U_j^{n+1} - U_j^n}{\Delta t}.$$
+</p>
+<p>We can think of this scheme as a stencil that we superimpose on our $(x,t)$-grid and this particular stencil is
+commonly referred to as <a href="http://en.wikipedia.org/wiki/Finite_difference#Forward.2C_backward.2C_and_central_differences">forward difference</a>.</p>
+<p>The spatial part of the <a href="http://journals.cambridge.org/abstract_S0305004100023197">Crank-Nicolson stencil</a>
+(or see <a href="http://people.maths.ox.ac.uk/trefethen/3all.pdf">Table 3.2.2 of Trefethen</a>)
+for the heat equation ($u_t = u_{xx}$) approximates the 
+<a href="http://en.wikipedia.org/wiki/Laplace_operator">Laplace operator</a> of our equation and takes the following form</p>
+<p>
+$$\frac{\partial^2 u}{\partial x^2}\Bigg|_{x = j \Delta x, t = n \Delta t} \approx \frac{1}{2 \Delta x^2} \left( U_{j+1}^n - 2 U_j^n + U_{j-1}^n + U_{j+1}^{n+1} - 2 U_j^{n+1} + U_{j-1}^{n+1}\right).$$
+</p>
+<p>To approximate $f(u(j \Delta x, n \Delta t))$ we write simply $f(U_j^n)$.</p>
+<p>These approximations define the stencil for our numerical method as pictured on <a href="http://en.wikipedia.org/wiki/Crank%E2%80%93Nicolson_method">Wikipedia</a>.</p>
+<p><img src="https://dl.dropboxusercontent.com/u/129945779/georgio/CN-stencil.svg" alt="SVG"></p>
+<p>Applying this stencil to grid point $(j,n)$ gives us the following approximation of our reaction-diffusion equation:</p>
+<p>
+$$\frac{U_j^{n+1} - U_j^n}{\Delta t} = \frac{D}{2 \Delta x^2} \left( U_{j+1}^n - 2 U_j^n + U_{j-1}^n + U_{j+1}^{n+1} - 2 U_j^{n+1} + U_{j-1}^{n+1}\right) + f(U_j^n).$$
+</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Reordering-Stencil-into-Linear-System">
+<a class="anchor" href="#Reordering-Stencil-into-Linear-System" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reordering Stencil into Linear System<a class="anchor-link" href="#Reordering-Stencil-into-Linear-System"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us define $\sigma = \frac{D \Delta t}{2 \Delta x^2}$ and reorder the above approximation of our reaction-diffusion equation:</p>
+<p>
+$$-\sigma U_{j-1}^{n+1} + (1+2\sigma) U_j^{n+1} -\sigma U_{j+1}^{n+1} = \sigma U_{j-1}^n + (1-2\sigma) U_j^n + \sigma U_{j+1}^n + \Delta t f(U_j^n).$$
+</p>
+<p>This equation makes sense for space indices $j = 1,\ldots,J-2$ but it does not make sense for indices $j=0$ and $j=J-1$ (on the boundaries):</p>
+<p>
+$$j=0:~-\sigma U_{-1}^{n+1} + (1+2\sigma) U_0^{n+1} -\sigma U_{1}^{n+1} = \sigma U_{-1}^n + (1-2\sigma) U_0^n + \sigma U_{1}^n + \Delta t f(U_0^n),$$
+</p>
+<p>
+$$j=J-1:~-\sigma U_{J-2}^{n+1} + (1+2\sigma) U_{J-1}^{n+1} -\sigma U_{J}^{n+1} = \sigma U_{J-2}^n + (1-2\sigma) U_{J-1}^n + \sigma U_{J}^n + \Delta t f(U_{J-1}^n).$$
+</p>
+<p>The problem here is that the values $U_{-1}^n$ and $U_J^n$ lie outside our grid.</p>
+<p>However, we can work out what these values should equal by considering our Neumann boundary condition.
+Let us discretize our boundary condition at $j=0$ with the 
+<a href="http://en.wikipedia.org/wiki/Finite_difference#Forward.2C_backward.2C_and_central_differences">backward difference</a> and
+at $j=J-1$ with the
+<a href="http://en.wikipedia.org/wiki/Finite_difference#Forward.2C_backward.2C_and_central_differences">forward difference</a>:</p>
+<p>
+$$\frac{U_1^n - U_0^n}{\Delta x} = 0,$$
+</p>
+<p>
+$$\frac{U_J^n - U_{J-1}^n}{\Delta x} = 0.$$
+</p>
+<p>These two equations make it clear that we need to amend our above numerical approximation for
+$j=0$ with the identities $U_0^n = U_1^n$ and $U_0^{n+1} = U_1^{n+1}$, and
+for $j=J-1$ with the identities $U_{J-1}^n = U_J^n$ and $U_{J-1}^{n+1} = U_J^{n+1}$.</p>
+<p>Let us reinterpret our numerical approximation of the line concentration of $u$ in a fixed point in time as a vector $\mathbf{U}^n$:</p>
+$$\mathbf{U}^n = 
+\begin{bmatrix} U_0^n \\ \vdots \\ U_{J-1}^n \end{bmatrix}.$$<p>Using this notation we can now write our above approximation for a fixed point in time, $t = n \Delta t$, compactly as a linear system:</p>
+$$
+\begin{bmatrix}
+1+\sigma &amp; -\sigma &amp; 0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+-\sigma &amp; 1+2\sigma &amp; -\sigma &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; -\sigma &amp; 1+2\sigma &amp; -\sigma &amp; \cdots &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; \ddots &amp; \ddots &amp; \ddots &amp; \ddots &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -\sigma &amp; 1+2\sigma &amp; -\sigma \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -\sigma &amp; 1+\sigma
+\end{bmatrix}
+\begin{bmatrix}
+U_0^{n+1} \\
+U_1^{n+1} \\
+U_2^{n+1} \\
+\vdots \\
+U_{J-2}^{n+1} \\
+U_{J-1}^{n+1}
+\end{bmatrix} =
+\begin{bmatrix}
+1-\sigma &amp; \sigma &amp; 0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+\sigma &amp; 1-2\sigma &amp; \sigma &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; \sigma &amp; 1-2\sigma &amp; \sigma &amp; \cdots &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; \ddots &amp; \ddots &amp; \ddots &amp; \ddots &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma &amp; 1-2\sigma &amp; \sigma \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma &amp; 1-\sigma
+\end{bmatrix}
+\begin{bmatrix}
+U_0^{n} \\
+U_1^{n} \\
+U_2^{n} \\
+\vdots \\
+U_{J-2}^{n} \\
+U_{J-1}^{n}
+\end{bmatrix} +
+\begin{bmatrix}
+\Delta t f(U_0^n) \\
+\Delta t f(U_1^n) \\
+\Delta t f(U_2^n) \\
+\vdots \\
+\Delta t f(U_{J-2}^n) \\
+\Delta t f(U_{J-1}^n)
+\end{bmatrix}.
+$$<p>Note that since our numerical integration starts with a well-defined initial condition at $n=0$, $\mathbf{U}^0$, the
+vector $\mathbf{U}^{n+1}$ on the left-hand side is the only unknown in this system of linear equations.</p>
+<p>Thus, to integrate numerically our reaction-diffusion system from time point $n$ to $n+1$ we need to solve numerically for vector $\mathbf{U}^{n+1}$.</p>
+<p>Let us call the matrix on the left-hand side $A$, the one on the right-hand side $B$,
+and the vector on the right-hand side $\mathbf{f}^n$.
+Using this notation we can write the above system as</p>
+<p>
+$$A \mathbf{U}^{n+1} = B \mathbf{U}^n + f^n.$$
+</p>
+<p>In this linear equation, matrices $A$ and $B$ are defined by our problem: we need to specify these matrices once for our
+problem and incorporate our boundary conditions in them.
+Vector $\mathbf{f}^n$ is a function of $\mathbf{U}^n$ and so needs to be reevaluated in every time point $n$.
+We also need to carry out one matrix-vector multiplication every time point, $B \mathbf{U}^n$, and
+one vector-vector addition, $B \mathbf{U}^n + f^n$.</p>
+<p>The most expensive numerical operation is inversion of matrix $A$ to solve for $\mathbf{U}^{n+1}$, however we may
+get away with doing this only once and store the inverse of $A$ as $A^{-1}$:</p>
+<p>
+$$\mathbf{U}^{n+1} = A^{-1} \left( B \mathbf{U}^n + f^n \right).$$
+</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="A-Crank-Nicolson-Example-in-Python">
+<a class="anchor" href="#A-Crank-Nicolson-Example-in-Python" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Crank-Nicolson Example in Python<a class="anchor-link" href="#A-Crank-Nicolson-Example-in-Python"> </a>
+</h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us apply the CN method to a two-variable reaction-diffusion system that was introduced by 
+<a href="http://www.sciencedirect.com/science/article/pii/S0006349508704442">Mori <em>et al.</em></a>:</p>
+<p>
+$$\frac{\partial u}{\partial t} = D_u \frac{\partial^2 u}{\partial x^2} + f(u,v),$$
+</p>
+<p>
+$$\frac{\partial v}{\partial t} = D_v \frac{\partial^2 v}{\partial x^2} - f(u,v),$$
+</p>
+<p>with Neumann boundary conditions</p>
+<p>
+$$\frac{\partial u}{\partial x}\Bigg|_{x=0,L} = 0,$$
+</p>
+<p>
+$$\frac{\partial v}{\partial x}\Bigg|_{x=0,L} = 0.$$
+</p>
+<p>The variables of this system, $u$ and $v$, represent the concetrations of the active form and its inactive form respectively.
+The reaction term $f(u,v)$ describes the interchange (activation and inactivation) between these two states of the protein.
+A particular property of this system is that the inactive has much greater diffusivity that the active form, $D_v \gg D_u$.</p>
+<p>Using the CN method to integrate this system numerically, we need to set up two separate approximations</p>
+<p>
+$$A_u \mathbf{U}^{n+1} = B_u \mathbf{U}^n + \mathbf{f}^n,$$
+</p>
+<p>
+$$A_v \mathbf{V}^{n+1} = B_v \mathbf{V}^n - \mathbf{f}^n,$$
+</p>
+<p>with two different $\sigma$ terms, $\sigma_u = \frac{D_u \Delta t}{2 \Delta x^2}$ and $\sigma_v = \frac{D_v \Delta t}{2 \Delta x^2}$.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Import-Packages">
+<a class="anchor" href="#Import-Packages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Import Packages<a class="anchor-link" href="#Import-Packages"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For the matrix-vector multiplication, vector-vector addition, and matrix inversion that we will need to carry
+out we will use the Python library <a href="http://www.numpy.org/">NumPy</a>.
+To visualize our numerical solutions, we will use <a href="http://matplotlib.org/api/pyplot_api.html">pyplot</a>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Numpy allows us to truncate the numerical values of matrices and vectors to improve their display with 
+<code>set_printoptions</code>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">numpy</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Specify-Grid">
+<a class="anchor" href="#Specify-Grid" aria-hidden="true"><span class="octicon octicon-link"></span></a>Specify Grid<a class="anchor-link" href="#Specify-Grid"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Our one-dimensional domain has unit length and we define <code>J = 100</code> equally spaced
+grid points in this domain.
+This divides our domain into <code>J-1</code> subintervals, each of length <code>dx</code>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">L</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">J</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">dx</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">x_grid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">j</span><span class="o">*</span><span class="n">dx</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Equally, we define <code>N = 1000</code> equally spaced grid points on our time domain of length <code>T = 200</code> thus dividing our time domain into <code>N-1</code> intervals of length <code>dt</code>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">T</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">t_grid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">n</span><span class="o">*</span><span class="n">dt</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Specify-System-Parameters-and-the-Reaction-Term">
+<a class="anchor" href="#Specify-System-Parameters-and-the-Reaction-Term" aria-hidden="true"><span class="octicon octicon-link"></span></a>Specify System Parameters and the Reaction Term<a class="anchor-link" href="#Specify-System-Parameters-and-the-Reaction-Term"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We choose our parameter values based on the work by
+<a href="http://www.sciencedirect.com/science/article/pii/S0006349508704442">Mori <em>et al.</em></a>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">D_v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">D_u</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">D_v</span>
+
+<span class="n">k0</span> <span class="o">=</span> <span class="mf">0.067</span>
+<span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">dt</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="p">(</span><span class="n">k0</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">u</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">u</span><span class="o">*</span><span class="n">u</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="o">-</span><span class="n">f</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+ 
+<span class="n">sigma_u</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">D_u</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">((</span><span class="mf">2.</span><span class="o">*</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="p">))</span>
+<span class="n">sigma_v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">D_v</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">((</span><span class="mf">2.</span><span class="o">*</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="p">))</span>
+
+<span class="n">total_protein</span> <span class="o">=</span> <span class="mf">2.26</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Specify-the-Initial-Condition">
+<a class="anchor" href="#Specify-the-Initial-Condition" aria-hidden="true"><span class="octicon octicon-link"></span></a>Specify the Initial Condition<a class="anchor-link" href="#Specify-the-Initial-Condition"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As discussed by
+<a href="http://www.sciencedirect.com/science/article/pii/S0006349508704442">Mori <em>et al.</em></a>,
+we can expect to observe interesting behaviour in the steady state of this system
+if we choose a heterogeneous initial condition for $u$.</p>
+<p>Here, we initialize $u$ with a step-like heterogeneity:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">no_high</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">U</span> <span class="o">=</span>  <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">no_high</span><span class="p">,</span><span class="n">J</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="mf">2.</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">no_high</span><span class="p">)])</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">total_protein</span><span class="o">-</span><span class="n">dx</span><span class="o">*</span><span class="nb">sum</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">J</span><span class="o">*</span><span class="n">dx</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">J</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that we make certain that total protein amounts equal a certain value,
+<code>total_protein</code>.
+The importance of this was discussed by 
+<a href="http://link.springer.com/article/10.1007%2Fs11538-012-9766-5">Walther <em>et al.</em></a>.</p>
+<p>Let us plot our initial condition for confirmation:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ylim</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s1">'x'</span><span class="p">);</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">'concentration'</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The blue curve is the initial condition for $U$, stored in Python variable <code>U</code>,
+and the green curve is the initial condition for $V$ stored in <code>V</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Create-Matrices">
+<a class="anchor" href="#Create-Matrices" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create Matrices<a class="anchor-link" href="#Create-Matrices"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The matrices that we need to construct are all tridiagonal so they are easy to
+construct with 
+<code>numpy.diagflat</code>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">A_u</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="o">-</span><span class="n">sigma_u</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="mf">1.</span><span class="o">+</span><span class="n">sigma_u</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_u</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">+</span><span class="n">sigma_u</span><span class="p">])</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="o">-</span><span class="n">sigma_u</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="mi">1</span><span class="p">)</span>
+        
+<span class="n">B_u</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="n">sigma_u</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="mf">1.</span><span class="o">-</span><span class="n">sigma_u</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">-</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_u</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">-</span><span class="n">sigma_u</span><span class="p">])</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="n">sigma_u</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="mi">1</span><span class="p">)</span>
+        
+<span class="n">A_v</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="o">-</span><span class="n">sigma_v</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="mf">1.</span><span class="o">+</span><span class="n">sigma_v</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_v</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">+</span><span class="n">sigma_v</span><span class="p">])</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="o">-</span><span class="n">sigma_v</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="mi">1</span><span class="p">)</span>
+        
+<span class="n">B_v</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="n">sigma_v</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="mf">1.</span><span class="o">-</span><span class="n">sigma_v</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">-</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_v</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="mf">1.</span><span class="o">-</span><span class="n">sigma_v</span><span class="p">])</span> <span class="o">+</span>\
+      <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">([</span><span class="n">sigma_v</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To confirm, this is what <code>A_u</code> looks like:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span> <span class="n">A_u</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[[ 1.981 -0.981  0.    ...,  0.     0.     0.   ]
+ [-0.981  2.962 -0.981 ...,  0.     0.     0.   ]
+ [ 0.    -0.981  2.962 ...,  0.     0.     0.   ]
+ ..., 
+ [ 0.     0.     0.    ...,  2.962 -0.981  0.   ]
+ [ 0.     0.     0.    ..., -0.981  2.962 -0.981]
+ [ 0.     0.     0.    ...,  0.    -0.981  1.981]]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Solve-the-System-Iteratively">
+<a class="anchor" href="#Solve-the-System-Iteratively" aria-hidden="true"><span class="octicon octicon-link"></span></a>Solve the System Iteratively<a class="anchor-link" href="#Solve-the-System-Iteratively"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To advance our system by one time step, we need to do one matrix-vector multiplication followed by one vector-vector addition on the right hand side.</p>
+<p>To facilitate this, we rewrite our reaction term so that it accepts concentration vectors $\mathbf{U}^n$ and $\mathbf{V}^n$ as arguments
+and returns vector $\mathbf{f}^n$.</p>
+<p>As a reminder, this is our non-vectorial definition of $f$</p>
+
+<pre><code>f = lambda u, v: v*(k0 + float(u*u)/float(1. + u*u)) - u</code></pre>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f_vec</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> 
+                     <span class="n">numpy</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">U</span><span class="p">,</span><span class="n">U</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">U</span><span class="p">,</span><span class="n">U</span><span class="p">))))),</span> <span class="n">U</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us make certain that this produces the same values as our non-vectorial <code>f</code>:</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span> <span class="n">f</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.00996135898275
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span> <span class="n">f</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>-0.0623832232232
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span> <span class="n">f_vec</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[ 0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+  0.01   0.01  -0.062 -0.062 -0.062 -0.062 -0.062 -0.062 -0.062 -0.062
+ -0.062 -0.062]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Accounting for rounding of the displayed values due to the <code>set_printoptions</code> we set above, we
+can see that <code>f</code> and <code>f_vec</code> generate the same values for our initial condition at both ends of our domain.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will use <code>numpy.linalg.solve</code> to solve
+our linear system each time step.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>While we integrate our system over time we will record both <code>U</code> and <code>V</code> at each
+time step in <code>U_record</code> and <code>V_record</code> respectively so that we can plot
+our numerical solutions over time.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">U_record</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">V_record</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">U_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+<span class="n">V_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">U_new</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A_u</span><span class="p">,</span> <span class="n">B_u</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">+</span> <span class="n">f_vec</span><span class="p">(</span><span class="n">U</span><span class="p">,</span><span class="n">V</span><span class="p">))</span>
+    <span class="n">V_new</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A_v</span><span class="p">,</span> <span class="n">B_v</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_vec</span><span class="p">(</span><span class="n">U</span><span class="p">,</span><span class="n">V</span><span class="p">))</span>
+    
+    <span class="n">U</span> <span class="o">=</span> <span class="n">U_new</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">V_new</span>
+    
+    <span class="n">U_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="n">V_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Plot-the-Numerical-Solution">
+<a class="anchor" href="#Plot-the-Numerical-Solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Plot the Numerical Solution<a class="anchor-link" href="#Plot-the-Numerical-Solution"> </a>
+</h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us take a look at the numerical solution we attain after <code>N</code> time steps.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ylim</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s1">'x'</span><span class="p">);</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">'concentration'</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYMAAAEECAYAAADK0VhyAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz%0AAAALEgAACxIB0t1+/AAAHgdJREFUeJzt3Xt4VPWdx/H3kJAEJQTEECUJcrWaK4kgQgWirKHAcnkE%0AhCi4Bu2TwnrBp1117WNLdl0X2t1WEaEgrdUWogjFUuW2tQwWNwKSKBCttphohotrkIuEBHL57R+n%0AuZGEzExm5kySz+t5zjPnzJyZ+eYnns/8zu9cHMYYg4iIdGnd7C5ARETspzAQERGFgYiIKAxERASF%0AgYiIoDAQEREg1O4CLsfhcNhdgohIh+TpWQNB3zMwxmgyhh//+Me21xAsk9pCbaG2uPzkjaAPAxER%0A8T+FgYiIKAw6ioyMDLtLCBpqiwZqiwZqi/ZxGG93MAWAw+Hwev+XiEhX5c22Uz0DERHxfRiUlpYy%0Abtw4kpOT+da3vsVPfvKTFtd7+OGHSUxMJD09ncLCQl+XISIiHvD5eQZhYWGsXLmSpKQkzp07R3p6%0AOhMnTiQ1NbV+nU2bNvHFF19QVFREYWEh2dnZfPDBB74uRURE3OTznkFMTAxJSUkA9OzZk5SUFI4d%0AO9Zkna1btzJ//nwA0tLSqK6uxuVy+boUERFxk1/PQC4pKWH//v289NJLTZ53uVzEx8fXL8fFxeFy%0AuYiLi2v2GUuWLKmfz8jI0BEDIiKXcDqdOJ3Odn2G38Lg3LlzzJ49m+eee47IyMhmr1860t3apSca%0Ah4GIiDR36Q/l3Nxcjz/DL0cTVVVVMXPmTO6++25mzJjR7PW4uDhKS0vrl1vrFYiISGD4PAyMMdx/%0A//0kJCTw6KOPtrjO5MmTWbduHQAFBQWEhIQQGxvr61JERMRNPj/pbM+ePYwbN46UlJT6XT/PPPMM%0AX3zxBQA5OTkAPPjgg+zatYvw8HDWrl1Lenp68+J00pmIiMe82XbqDGQRkU5GZyCLiIhXFAYiIqIw%0AEBERhYGIiKAwEBERFAYiIoLCQEREUBiIiAgKAxERQWEgIiIoDEREBIWBiIigMBARERQGIiKCn++B%0A7As3rLjB7hKkE2nt9qptvo+W33fp5zVez53XHDiazNe9dul8a4/dHN2azXdzdKtfdmcK6RbSMO8I%0AqV+um2/pMbRbaP1yaLfQJsv1r3drWK9uufF7Wlq/8XN1tbX0XON6L32upb+/cbtJy4I+DN6Y+4bd%0AJUgn4e29MQwtv+/Sz2u8njuvGUyT+brXLp1v67HW1DaZb7xcU1tT/3zj+brl+nlT0+S5GlNDTW1N%0Aq4/VtdVU1lY2Wa6urW6y7M5rNebvy5d8R10tl37vpfVe+nfUvdbS3w8N4VsXGC2FaluP0DykGz9X%0AN9/4++rm67T3R4Q/6OY2ItIlGPP34Px7kLY2f7nHus9p7bm6eWg57Bu/Xr/s5Wut/p0YhvUd5vG2%0AM+h7BiIivuBwOAhxhNhdRtDSALKIiCgMREREYSAiIigMREQEhYGIiKAwEBERFAYiIoLCQEREUBiI%0AiAgKAxERQWEgIiIoDEREBIWBiIigMBARERQGIiKCwkBERFAYiIgICgMREUFhICIiKAxERASFgYiI%0AoDAQEREUBiIigsJARERQGIiICAoDERHBT2GwYMECYmJiSE5ObvF1p9NJVFQUaWlppKWl8fTTT/uj%0ADBERcVOoPz40Ozubhx56iHvvvbfVdcaPH8+WLVv88fUiIuIhv/QMxo4dS58+fS67jjHGH18tIiJe%0A8EvPoC0Oh4P8/HySk5Pp168fP/vZz0hNTW1x3SVLltTPZ2RkkJGREZgiRUQ6CKfTidPpbNdnOIyf%0AfqKXlJQwdepUDh061Oy1c+fOERoaSkREBDt37iQnJ4fi4uLmxTkc6kGIiHjIm22nLUcT9ezZk4iI%0ACAAyMzMJCwvjxIkTdpQiIiLYFAZlZWX18wcOHKC8vJx+/frZUYqIiOCnMYOsrCx2795NWVkZ8fHx%0A5ObmUlVVBUBOTg55eXmsWbMGgLCwMNavX0+3bjrlQUTELn4bM/AFjRmIiHiuw4wZiIhIcFEYiIiI%0AwkBERBQGIiKCwkBERFAYiIgICgMREUFhICIiKAxERASFgYiI4Oa1iYqLi3G5XBhjMMbgcDgYN26c%0Av2sTEZEAaTMMFi9ezObNm0lMTCQkJKT+eYWBiEjn0eaF6gYPHszHH39MeHh4oGqqpwvViYh4zi8X%0AqktISKCmpsbrokREJPi1uZsoLCyM5ORkJkyYUN87cDgcLF++3O/FiYhIYLQZBtOmTWPatGk4HA6A%0A+gFkERHpPNy6uU1lZSWHDx/G4XCQlJQUsPEDjRmIiHjOm21nmz2DHTt2cN999zFs2DAA/vrXv/Ly%0Ayy+TmZnpXZUiIhJ02uwZJCcns3nzZoYOHQrAkSNHmDFjBocOHfJ/ceoZiIh4zC9HE9XW1tYHAcCQ%0AIUOora31vDoREQlabe4mSklJIScnh6ysLIwxvPbaa6SkpASiNhERCZA2dxNVVFTw85//nHfffReA%0AsWPHsnjxYiIiIvxfnHYTiYh4zJttp1tHE9lFYSAi4jmfHk00e/ZsXn/9dZKSkpqdV+BwODh48KB3%0AVYqISNBptWdw7Ngx+vfvz+eff94sYRwOB9ddd53/i1PPQETEYz49mqh///4ArFy5koEDBzaZVq5c%0A2b5KRUQkqLR5aOnOnTubPfeHP/zBL8WIiIg9Wh0zWLVqFStXruTIkSMkJyfXP3/+/HmGDx8ekOJE%0ARCQwWh0zOHPmDKdOneKJJ55g2bJl9fufevToQUxMTGCK05iBiIjH/HZoqTGG48ePU11dXf/cgAED%0APK/QQwoDERHP+eVyFK+//jqDBw9m2LBhjB8/noEDBzJp0iSvixQRkeDTZhg89dRT7N+/n+uvv57i%0A4mKcTie33HJLIGoTEZEAaTMMrrzySq6++mqqqqowxjBu3Djef//9QNQmIiIB0uaF6nr16sX58+cZ%0AM2YMWVlZ9OvXj+7duweiNhERCZA2B5DLy8uJiIigqqqKV155hcrKSu655x769u3r/+I0gCwi4jGf%0AH01UU1NDZmYmb7/9druL84bCQETEcz6/7WVISAihoaF88803REZGtqs4ERFxjzFw+jSUlcHXX8Op%0AU9Z09ix88w2cOwfnz0NFhTVduADV1Q2TN9ocMwgPDychIYHMzEyuuOIKwEqd5cuXe/eNIiJdmDHW%0Ahv2zz6ypuBhcLigttR5PnID/+z/o0QOuvhr69oU+faypVy+IjISePa3XIiKs9cLDoXt3CA21pjfe%0A8LyuNsNg5syZ3HnnnfWXsTbGNLuktYiINPf11/DBB9b00Ufw8cfwl79Yv96HDIHBg2HgQBg2DG67%0ADWJj4dprITra2sgHUpthcOrUKRYvXtzkuWeffdZvBYmIdEQVFVBQAPn58N57sG+ftasnNRWGD4cR%0AI2D+fLjxRmtjH2y/qds8migtLY3CwsImzyUnJ3Po0CG/FgYaQBaR4FVdDXv3wp/+ZE3791sb+ltu%0AgdGj4eabrV/+3do8m8v3fDqAnJeXx/r16ykuLmbq1Kn1z58/f57evXt7X6WISAd15gxs2wZ/+ANs%0A3w7x8XDHHfDYY3Drrdb+/I6q1TAYM2YM1157LV999RU/+MEPmly1NC0tLWAFiojY6dw5a+P/2muw%0A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%0ARERQGIiICPD/nl62oEp/gH0AAAAASUVORK5CYII=%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And here is a <a href="http://en.wikipedia.org/wiki/Kymograph">kymograph</a> of the values of <code>U</code>.
+This plot shows concisely the behaviour of <code>U</code> over time and we can clear observe the wave-pinning
+behaviour described by <a href="http://www.sciencedirect.com/science/article/pii/S0006349508704442">Mori <em>et al.</em></a>.
+Furthermore, we observe that this wave pattern is stable for about 50 units of time and we therefore
+conclude that this wave pattern is a stable steady state of our system.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">U_record</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">U_record</span><span class="p">)</span>
+<span class="n">V_record</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">V_record</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">subplots</span><span class="p">()</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s1">'x'</span><span class="p">);</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">'t'</span><span class="p">)</span>
+<span class="n">heatmap</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x_grid</span><span class="p">,</span> <span class="n">t_grid</span><span class="p">,</span> <span class="n">U_record</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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%0AABYCAwDAQmAAAFgIDAAAC4EBAGAhMAAALGxMC2DCEqrIdxYQIVoMAAALgQEAYCEwAAAsBAYAgIXA%0AAACwEBgAABamqwLIm1GmuRYkWgwAAAuBAQBgITAAACwEBgCAhcAAALAwKwlAVrHBXvGhxQAAsBAY%0AAAAWAgMAwEJgAABYCAwAAAuBAQBgYboqUO5G8p0BFBpaDAAACy0GoFQl8p0BFCtaDAAAC4EBAGAh%0AMAAALAQGAIAl8sBwzz33aO7cuWpubk4+d/z4ca1Zs0YtLS264YYbdOLEiWTatm3b1NjYqObmZj3/%0A/PNRZwcAkKbIA8Pdd9+tjo4O67nNmzfrpptu0sGDB7V27Vpt3rxZktTd3a1nnnlGb775pjo6OrRp%0A0yYNDw9HnSUg+xLGA74SqrAeKEyRB4ZrrrlGs2bNsp7bu3evNm7cKEnasGGD2tvbJUnt7e1av369%0AKioqtGDBAjU1NamrqyvqLAEA0nDewPDQQw+Fei5IX1+fampqJEm1tbU6evSoJKm3t1f19fXJ6+rr%0A6xWPx8e/ycCW1GOkM62fDwDl4DVJjxqPTJ03MIzX779nz54J/MgMTd2SelStzv3PB8rc6FiF9UDh%0AuUrSg8YjU74rn5944gn95je/0eHDh62B5IGBAS1dujStH1JXV6f+/n7V1taqr69Pc+bMkXS2hdDT%0A05O8Lh6Pq6GhId3fAQAQId8Ww1133aU9e/bo5ptv1l/+8hft2bNHe/bs0d///nft3r07rR/S2tqq%0AtrY2SVJbW5taW1uTz+/cuVOJRELxeFyHDh3SypUrJ/DrAAAmyrfFMGPGDM2YMUNPPfVUWje88847%0A9dJLL6m/v18NDQ165JFHtHXrVq1bt047duzQvHnztGvXLknSlVdeqdtuu00tLS2aNGmStm/frqqq%0Aqon9RgCACYl5nuflOxPnE4vFpNqCzyaKSSafP8JuOeleZ3bHVwVcZ55PcdKm+BxPc667yDi+0Diu%0Ada4zz2ucNLM3tz41/7am/oh92aRUN/B8ve/coue8x5J0iU/a/CH7ftN6xlIndpJ9ftQ4PuZcdzwg%0A7WPj+LTPsXs+ZByfca4z0gadtJHR1HHCmN484kx19pv5nM4u6QslZVLFs/IZAGAhMAAALAQGAICF%0AwAAAsBAYAAAWAgMAwMJ3PgPFbPT8lwDposUAALAQGAAAFrqSAGSEL9opXbQYAAAWAgMAwEJgAABY%0A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%0Ata99TQ899NC5F2Vj0/FiNNIpVa3Ody4KA2WRMl5ZZPs9EzQdNuT21GEHn600tzvKTfvfTuk/Vmv4%0AxHTrskOLVySPBz9jL35LGDV5hdWysCPUFz7XnTyOfWAk/F8nT8bv5f4ZzFZCoX7ezXtgGBoa0n33%0A3aeXX35Zc+fO1dVXX63rr79ey5Ytcy7MT/4KzlCnNLY637koDJRFSj7KwnxPhq1J3JaF+cHdDDRB%0AW2y4gaHPOO6X9EandGq1jA/+/35damzi8KkmKynRMv4gidvlNHN26oc3ffZwKuGfzguNFoRb+R9X%0A4ct7YHj99dfV1NSkBQsWSJLWrVun9vb2cwOD+x+lXHmi9fQpyiKlkMsik3UXbmskaMqr2bro1dlA%0AMSLpXec68/x/7aT33r0ieXzsv2qTx4NT7ZaF2ZqYuSQVJBb885h1nTn+4PaKFdJYgp+8B4Z4PK6G%0AhobkeX19vTo7O8+90CuG4syFBGWRRFmkFHBZZNJfkkijavrIfWJM6h9RYF9XzDk3pqWe+mwqMOxZ%0A/RXrsj1fT53/n//ckTzetH67dd2XnuxKHi93przucWJIIcp7YIjF3L+Qn6nnv6Rs/E++M1BAKIsU%0AyiLlv4OTPee83+f4Vee6banDP2r841KQ98BQX1+vnp6e5HlPT4/VgpAkz3P/igCAbJmU7wx8/vOf%0A16FDh9Tb26uRkRHt2rVLa9euzXe2AKBs5b3FMGXKFD3xxBO64YYbNDY2po0bN2r58uX5zhYAlK28%0Atxgkae3atTp06JB+9atf6Y9//KMaGxv1i1/8YtxrH3jgATU1NWn58uU6cOBAjnOaOx0dHWpubvYt%0Aiz/84Q9qaWlRc3OzVqxYoe7u7nHuUhrOVxaf2rdvnyorK/XMM8/kMHe5FaYsOjs7tXLlSi1dulTX%0AXnttjnOYO+criw8//FDXXXedmpqadPnll2v79u3j3KX43XPPPZo7d66am5t9r0m73vQKxJkzZ7zL%0ALrvMi8fj3sjIiLdixQpv//791jVPP/20d8stt3ie53n79+/3lixZko+sZl2Ysnj99de9kydPep7n%0Aec8995y3dOnSfGQ168KUhed5XiKR8L785S97N910k/f000/nIafZF6YsPvjgA6+pqck7cuSI53me%0Ad+zYsXxkNevClMWPfvQj74c//KHneZ7X19fnzZw50ztz5kw+sptVf/vb37z9+/d7ixcvHjc9k3qz%0AIFoMkr2eobKyMrmewbR3715t3LhRkrRs2TIlEgnF4/HxblfUwpTFypUrddFFZ7+I5Itf/KJ6e3vz%0AkdWsC1MWkvT444/rjjvuUF1dXR5ymRthyuKpp57SunXrNGfO2Y3lZs+ePd6til6YsmhoaNDJk2c3%0AnTh58qTq6upUXe1ug1r8rrnmGs2aNcs3PZN6s2ACw3jrGdzMh7mmFKT7e27fvl233HJLLrKWc2HK%0Aore3V3/+85913333SUpnCnRxCVMWb7/9tt5//31dffXVamlp0ZNPPpnrbOZEmLL45je/qX/84x+6%0A+OKLtWTJEj322GO5zmZByKTezPvg86fCvpk9Z+pqKVYC6fxOnZ2d2rFjh1555ZUs5ih/wpTFgw8+%0AqJ///OeKxWLyPK9kpzeHKYvR0VEdOnRIf/3rXzUwMKCrrrpKV199tZqams772mISpix+9rOfaenS%0Apers7NThw4e1Zs0avfHGG8mWdjlJt94smBZDmPUM7jXxeFz19fU5y2OuhCkLSTp48KDuvfdePfvs%0As4FNyWIWpiy6u7u1fv16LVy4ULt379b999+vZ599NtdZzbowZXHJJZfo+uuv1wUXXKCamhpde+21%0AOnjwYK6zmnVhyuLll1/WV75ydqXyokWLtHDhQv3zn+6mRqUvo3ozshGQCRocHPQuvfRSLx6Pe8PD%0Aw96KFSu87u5u65qnn37au/XWWz3P87zu7m6vpaUlH1nNujBl8d5773mLFi3yXn311TzlMjfClIXp%0A61//urd79+4c5jB3wpTF/v37veuuu85LJBLe6dOnvcbGRu/AgQN5ynH2hCmL+++/39uyZYvneZ73%0A4YcfevPmzUsOypead955J3DwOd16s2C6kvzWM3w6xWzTpk26/fbb9eKLL6qpqUnV1dX63e9+l+dc%0AZ0eYsnjkkUf00UcfJfvVq6qq1NXVFXTbohSmLMpFmLJYtmyZbrzxRrW0tGhkZET33nuvli5dmuec%0ARy9MWfzkJz/Rhg0b1NjYqNHRUf30pz9NDsqXkjvvvFMvvfSS+vv71dDQoK1bt2pk5OyOipnWmzHP%0AK9EOWQBARgpmjAEAUBgIDAAAC4EBAGAhMAAALAQGIAP79u3TkiVLNDQ0pNOnT2vx4sV666238p0t%0AIBLMSgIy9OMf/1hnzpzR4OCgGhoa9NBDD+U7S0AkCAxAhkZGRrRixQpdcMEFevXVV0tyexaUJ7qS%0AgAz19/fr9OnTOnXqlAYHB/OdHSAytBiADN18882666679K9//UsffPCBHn/88XxnCYhEwWyJARST%0A3//+96qguAyGAAAAQUlEQVSurtb69es1NjamL3zhC+rs7NTq1avznTVgwmgxAAAsjDEAACwEBgCA%0AhcAAALAQGAAAFgIDAMBCYAAAWP4/JxX2wzCh4jcAAAAASUVORK5CYII=%0A">
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="waltherg/georgio_fastpages"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/python/numpy/numerical%20analysis/partial%20differential%20equations/2013/12/03/Crank_Nicolson.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>My personal blog on tech and data</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/waltherg" title="waltherg"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://www.linkedin.com/in/georgwalther" title="georgwalther"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#linkedin"></use></svg></a></li><li><a rel="me" href="https://twitter.com/GeorgRWalther" title="GeorgRWalther"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

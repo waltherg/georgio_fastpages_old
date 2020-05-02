@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Multiclass classification applied to a stream of documents in Python | georg.io</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Multiclass classification applied to a stream of documents in Python" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this article we implement multiclass classification on an online stream of documents implemented in Python." />
+<meta property="og:description" content="In this article we implement multiclass classification on an online stream of documents implemented in Python." />
+<link rel="canonical" href="https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html" />
+<meta property="og:url" content="https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html" />
+<meta property="og:site_name" content="georg.io" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-10-10T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"In this article we implement multiclass classification on an online stream of documents implemented in Python.","mainEntityOfPage":{"@type":"WebPage","@id":"https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html"},"@type":"BlogPosting","url":"https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html","headline":"Multiclass classification applied to a stream of documents in Python","dateModified":"2014-10-10T00:00:00-05:00","datePublished":"2014-10-10T00:00:00-05:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://georg.io/feed.xml" title="georg.io" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-45212489-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Multiclass classification applied to a stream of documents in Python | georg.io</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Multiclass classification applied to a stream of documents in Python" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this article we implement multiclass classification on an online stream of documents implemented in Python." />
+<meta property="og:description" content="In this article we implement multiclass classification on an online stream of documents implemented in Python." />
+<link rel="canonical" href="https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html" />
+<meta property="og:url" content="https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html" />
+<meta property="og:site_name" content="georg.io" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2014-10-10T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"In this article we implement multiclass classification on an online stream of documents implemented in Python.","mainEntityOfPage":{"@type":"WebPage","@id":"https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html"},"@type":"BlogPosting","url":"https://georg.io/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html","headline":"Multiclass classification applied to a stream of documents in Python","dateModified":"2014-10-10T00:00:00-05:00","datePublished":"2014-10-10T00:00:00-05:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://georg.io/feed.xml" title="georg.io" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-45212489-1','auto');ga('require','displayfeatures');ga('send','pageview');</script>
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+<script type="text/javascript">
+require.config({
+  paths: {
+    jquery: 'https://code.jquery.com/jquery-3.5.0.min',
+    plotly: 'https://cdn.plot.ly/plotly-latest.min'
+  },
+
+  shim: {
+    plotly: {
+      deps: ['jquery'],
+      exports: 'plotly'
+    }
+  }
+});
+</script>
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">georg.io</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About Me</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Multiclass classification applied to a stream of documents in Python</h1><p class="page-description">In this article we implement multiclass classification on an online stream of documents implemented in Python.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2014-10-10T00:00:00-05:00" itemprop="datePublished">
+        Oct 10, 2014
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      8 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#scikit-learn">scikit-learn</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/categories/#nlp">nlp</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/waltherg/georgio_fastpages/tree/master/_notebooks/2014-10-10-Classifying_Wikipedia_Changes.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/waltherg/georgio_fastpages/master?filepath=_notebooks%2F2014-10-10-Classifying_Wikipedia_Changes.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/waltherg/georgio_fastpages/blob/master/_notebooks/2014-10-10-Classifying_Wikipedia_Changes.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#Classifying-Wikipedia-Changes">Classifying Wikipedia Changes </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2014-10-10-Classifying_Wikipedia_Changes.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Classifying-Wikipedia-Changes">
+<a class="anchor" href="#Classifying-Wikipedia-Changes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Classifying Wikipedia Changes<a class="anchor-link" href="#Classifying-Wikipedia-Changes"> </a>
+</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>I recently joined a Kaggle competition on <a href="http://www.kaggle.com/c/tradeshift-text-classification">multilabel text classification</a> 
+and have learned a ton from basic code that one of the competitors 
+<a href="http://www.kaggle.com/c/tradeshift-text-classification/forums/t/10537/beat-the-benchmark-with-less-than-400mb-of-memory">shared in the forums</a>.</p>
+<p>The code of the genereous competitor does logistic regression classification for multiple classes with stochastic gradient ascent.
+It is further well-suited for online learning as it uses the hashing trick to one-hot encode boolean, string, and categorial features.</p>
+<p>To better understand these methods and tricks I here apply some of them to a multilabel problem I chose mostly for the easy access to a constant stream of training data:</p>
+<p>All recent changes on Wikipedia are tracked on <a href="http://en.wikipedia.org/wiki/Special:RecentChanges">this special page</a>
+where we can see a number of interesting features such as the length of the change, the contributor's username,
+the title of the changed article, and the contributor's comment for a given change.</p>
+<p>Using the Wikipedia API to look at this stream of changes we can also see how contributors classify their changes as <strong>bot</strong>, <strong>minor</strong>, and <strong>new</strong>.
+Multiple label assignments are possible, so that one contribution may be classified as both bot and new.</p>
+<p>Here I will listen to this stream of changes, extract four features (length of change, comment string, username, and article title), and train three logistic regression classifiers (one for each class) to predict the likelihood of a change belonging to each one of them.
+The training is done with the stochastic gradient ascent method.</p>
+<p>One caveat: I am a complete novice when it comes to most of this stuff so please take everything that follows with a grain of salt - on the same note I would be forever grateful for any feedback especially of the critical kind so that I can learn and improve.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">pt</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">sqrt</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The API that Wikipedia offer to listen to the stream of recent changes is described 
+<a href="http://www.mediawiki.org/wiki/API:Recentchanges">here</a>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URL</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'http://en.wikipedia.org/w/api.php?format=json&amp;action=query&amp;list=recentchanges&amp;rcprop=parsedcomment'</span>
+      <span class="s1">'%7Ctimestamp%7Ctitle%7Cflags%7Cids%7Csizes%7Cflags%7Cuser&amp;rclimit=100'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The logistic regression classifier requires us to compute the dot product between a feature vector $\mathbf{x}$
+and a weight vector $\mathbf{w}$.</p>
+<p>
+$$\mathbf{w}^\text{T} \mathbf{x} = w_0 x_0 + w_1 x_1 + w_2 x_2 + \ldots + w_N x_N.$$
+</p>
+<p>As by convention, the bias of the model is encoded with feature $x_0 = 1$ for all observations -
+the only thing that will change about the $w_0 x_0$-term is weight $w_0$ upon training.
+The length of the article change is tracked with numerical feature $x_1$ which equals the number of character changes
+(hence $x_1$ is either positive or negative for text addition and removal respectively).</p>
+<p>As in the Kaggle code that our code is mostly based upon, string features are one-hot encoded using the
+<a href="https://en.wikipedia.org/wiki/Feature_hashing">hashing trick</a>:</p>
+<p>The string features extracted for each observed article change are username, a parse of the comment, and the title of article.
+Since this is an online learning problem there is no way of knowing how many unique usernames, comment strings, and article titles
+are going to be observed.</p>
+<p>With the hashing trick we decide <em>ab initio</em> that <code>D_sparse</code>-many unique values across these three features are sufficient to care about:
+Our one-hot encoded feature space has dimension <code>D_sparse</code> and can be represented as a <code>D_sparse</code>-dimensional vector filled
+with <code>0</code>'s and <code>1</code>'s (feature not present / present respectively).</p>
+<p>The <em>hash</em> in <em>hashing trick</em> comes from the fact that we use a hash function to convert strings to integers.
+Suppose now that we chose <code>D_sparse = 3</code> and our hash function produces
+<code>hash("georg") = 0</code>, <code>hash("georgwalther") = 2</code>, and <code>hash("walther") = 3</code> for three observed usernames.</p>
+<p>For username <code>georg</code> we get feature vector $[1, 0, 0]$ and for username <code>georgwalther</code> we get $[0, 0, 1]$.
+The hash function maps username <code>walther</code> outside our 3-dimensional feature space and to close this loop we not only
+use the <code>hash</code> function but also the <code>modulus</code> (which defines an <a href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence relation</a>?):</p>
+<p><code>hash("georg") % D_sparse = 0</code>, <code>hash("georgwalther") % D_sparse = 2</code>, and <code>hash("walther") % D_sparse = 0</code></p>
+<p>This illustrates one downside of using the hashing trick since we will now map usernames <code>georg</code> and <code>walther</code> to the same feature vector $[1, 0, 0]$.
+We are therefore best adviced to choose a big <code>D_sparse</code> to avoid mapping different feature values to the same one-hot-encoded feature - but probably not too big to preserve memory.</p>
+<p>For each article change observation we only map three string features into this <code>D_sparse</code>-dimensional one-hot-encoded feature space - out of <code>D_sparse</code>-many vector elements there will only ever be three ones among (<code>D_sparse</code>-3) zeros (if we do not map to the same vector index multiple times).
+We will therefore use sparse encoding for these feature vectors (hence the <code>sparse</code> in <code>D_sparse</code>).</p>
+<p>We will also normalize the length of change on the fly using
+an 
+<a href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Incremental_algorithm">online algorithm for mean and variance estimation</a>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">D</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># number of non-sparse features</span>
+<span class="n">D_sparse</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">18</span>  <span class="c1"># number of sparsely-encoded features</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_length_statistics</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">M2</span><span class="p">):</span>
+    <span class="sd">""" https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Incremental_algorithm """</span>
+    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">length</span><span class="o">-</span><span class="n">mean</span>
+    <span class="n">mean</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+    <span class="n">M2</span> <span class="o">+=</span> <span class="n">delta</span><span class="o">*</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">M2</span>
+
+    <span class="n">variance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">M2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">M2</span>
+
+<span class="k">def</span> <span class="nf">get_data</span><span class="p">():</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span>  <span class="c1"># bias term, length of edit</span>
+    <span class="n">X_sparse</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># hash of comment, hash of username, hash of title</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># bot, minor, new</span>
+
+    <span class="n">length_n</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">length_mean</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">length_M2</span> <span class="o">=</span> <span class="mf">0.</span>
+    
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+        <span class="n">r_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s1">'query'</span><span class="p">][</span><span class="s1">'recentchanges'</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">r_json</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="s1">'newlen'</span><span class="p">]</span> <span class="o">-</span> <span class="n">el</span><span class="p">[</span><span class="s1">'oldlen'</span><span class="p">])</span>
+            <span class="n">length_n</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">length_mean</span><span class="p">,</span> <span class="n">length_std</span><span class="p">,</span> <span class="n">length_M2</span> <span class="o">=</span> <span class="n">get_length_statistics</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">length_n</span><span class="p">,</span> <span class="n">length_mean</span><span class="p">,</span> <span class="n">length_M2</span><span class="p">)</span>
+            <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="n">length_mean</span><span class="p">)</span><span class="o">/</span><span class="n">length_std</span> <span class="k">if</span> <span class="n">length_std</span> <span class="o">&gt;</span> <span class="mf">0.</span> <span class="k">else</span> <span class="n">length</span>
+
+            <span class="n">X_sparse</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="s1">'comment_'</span> <span class="o">+</span> <span class="n">el</span><span class="p">[</span><span class="s1">'parsedcomment'</span><span class="p">]))</span> <span class="o">%</span> <span class="n">D_sparse</span>
+            <span class="n">X_sparse</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="s1">'username_'</span> <span class="o">+</span> <span class="n">el</span><span class="p">[</span><span class="s1">'user'</span><span class="p">]))</span> <span class="o">%</span> <span class="n">D_sparse</span>
+            <span class="n">X_sparse</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="s1">'title_'</span> <span class="o">+</span> <span class="n">el</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]))</span> <span class="o">%</span> <span class="n">D_sparse</span>
+
+            <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'bot'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'minor'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="n">Y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'new'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+
+            <span class="k">yield</span> <span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">X_sparse</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">w_sparse</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span><span class="p">):</span>
+    <span class="sd">""" P(y = 1 | (x, x_sparse), (w, w_sparse)) """</span>
+    <span class="n">wTx</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">wTx</span> <span class="o">+=</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">val</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x_sparse</span><span class="p">:</span>
+        <span class="n">wTx</span> <span class="o">+=</span> <span class="n">w_sparse</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># *1 if i in x_sparse</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">wTx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">wTx</span><span class="p">,</span> <span class="o">-</span><span class="mf">100.</span><span class="p">),</span> <span class="mf">100.</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">wTx</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="n">wTx</span>
+        <span class="k">raise</span>
+        
+    <span class="k">return</span> <span class="n">res</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_sparse</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">val</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x_sparse</span><span class="p">:</span>
+        <span class="n">w_sparse</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">alpha</span>  <span class="c1"># * feature[i] but feature[i] == 1 if i in x</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">K</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">w</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">D</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)]</span>
+<span class="n">w_sparse</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">D_sparse</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">)]</span>
+<span class="n">predictions</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">K</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">time0</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="n">training_time</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">ctr</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span> <span class="ow">in</span> <span class="n">get_data</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">w_sparse</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span><span class="p">)</span>
+        <span class="n">predictions</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">update</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">w_sparse</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="n">ctr</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="c1"># if ctr % 10000 == 0:</span>
+        <span class="c1"># print 'samples seen', ctr</span>
+        <span class="c1"># print 'sample', y</span>
+        <span class="c1"># print 'predicted', predictions</span>
+        <span class="c1"># print ''</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">time0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">training_time</span><span class="p">:</span>
+        <span class="k">break</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ctr</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As we can see, we crunched through 106,401 article changes during our ten-minute online training.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It would be fairly hard to understand the link between the <code>D_sparse</code>-dimensional one-hot-encoded feature space and
+the observed / predicted classes.
+However we can still look at the influence that the length of the article change has on our classification problem</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span> <span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here we can see that the weight of the length of change for class <code>0</code> (<strong>bot</strong>) is <code>-1.12</code>, for class <code>1</code> (<strong>minor</strong>) is <code>-0.97</code>, and for class <code>2</code> (<strong>new</strong>) is <code>2.11</code>.</p>
+<p>Intuitively this makes sense since many added characters (big positive change) should make classification as a <strong>minor</strong> change
+less likely and classification as a <strong>new</strong> article more likely:
+For an observed positive character count change $C$, $2.11 C$ will place us further to the right, and $-0.97 C$ further to the left along the $x$-axis of the sigmoid function:</p>
+<p><img src="http://gaelvaroquaux.github.io/scikit-learn-tutorial/_images/logistic_regression1.png" alt="img">
+(from <a href="http://gaelvaroquaux.github.io/scikit-learn-tutorial/supervised_learning.html#classification">http://gaelvaroquaux.github.io/scikit-learn-tutorial/supervised_learning.html#classification</a>)</p>
+<p>Further below we will see that the vast majority of <strong>bot</strong> changes are classified as <strong>minor</strong> changes hence we would expect to see correlation between the weights of this feature for these two classes.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To further evaluate our three classifiers, we observe another 10,000 Wikipedia changes and construct a confusion matrix.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">no_test</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">test_ctr</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">c_i</span> <span class="k">for</span> <span class="n">c_i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">3</span><span class="p">)))}</span>
+<span class="n">confusion_matrix</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))]</span>
+
+<span class="n">predicted</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span> <span class="ow">in</span> <span class="n">get_data</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">w_sparse</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_sparse</span><span class="p">)</span>
+        <span class="n">predicted</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="o">.</span><span class="mi">5</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">predicted</span><span class="p">)]</span>
+    <span class="n">confusion_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">test_ctr</span> <span class="o">+=</span><span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">test_ctr</span> <span class="o">&gt;=</span> <span class="n">no_test</span><span class="p">:</span>
+        <span class="k">break</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'font.size'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">pt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">jet</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">'nearest'</span><span class="p">)</span>
+<span class="n">cb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">classes</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()}[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">))]</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)),</span> <span class="n">labels</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)),</span> <span class="n">labels</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The confusion matrix shows actual classes along the vertical and predicted classes along the horizontal axis.</p>
+<p>The vast majority of observed classes are $(0, 0, 0)$ and our classifiers get most of these right except that some
+are misclassified as $(0, 0, 1)$ and $(0, 1, 0)$.</p>
+<p>All observed bot-related changes (classes starting with a $1$) are $(1, 1, 0)$ (i.e. minor bot-effected changes) and
+our classifiers get all of those right.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="waltherg/georgio_fastpages"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/python/scikit-learn/nlp/2014/10/10/Classifying_Wikipedia_Changes.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>My personal blog on tech and data</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/waltherg" title="waltherg"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://www.linkedin.com/in/georgwalther" title="georgwalther"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#linkedin"></use></svg></a></li><li><a rel="me" href="https://twitter.com/GeorgRWalther" title="GeorgRWalther"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,4 +1,150 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-02T09:55:59-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">Decision intelligence from historical observations for optimal marketing resource use</title><link href="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing" rel="alternate" type="text/html" title="Decision intelligence from historical observations for optimal marketing resource use" /><published>2020-01-12T00:00:00-06:00</published><updated>2020-01-12T00:00:00-06:00</updated><id>https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing</id><content type="html" xml:base="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing">&lt;!--
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-03T10:36:56-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">Data system performance concepts and data models for the data-driven company</title><link href="https://georg.io/2020/01/26/Data_models_for_the_data_driven_company" rel="alternate" type="text/html" title="Data system performance concepts and data models for the data-driven company" /><published>2020-01-26T00:00:00-06:00</published><updated>2020-01-26T00:00:00-06:00</updated><id>https://georg.io/2020/01/26/Data_models_for_the_data_driven_company</id><content type="html" xml:base="https://georg.io/2020/01/26/Data_models_for_the_data_driven_company">&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;Data-driven companies generate actionable insights from their data - thus being able to take
+tractable steps guided by data.&lt;/p&gt;
+
+&lt;p&gt;Actionable insights guiding data-driven companies may be:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Our production data show that lowering roll pressure on this machine by X bar when Y steel from Z supplier is processed will
+increase product quality by 5%&lt;/li&gt;
+  &lt;li&gt;Our procurement data prove that we should place this order with supplier X instead of supplier Y this month in order to
+save 12% on raw materials cost&lt;/li&gt;
+  &lt;li&gt;Our sales data indicate that offering client X will increase the likelihood of them increasing their order volume thus
+offsetting our discount favorably&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/data_driven_company_stages.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;For enterprises to get to these actionable insights they need to collect, store, model, and analyze data appropriately.
+In this article we will explore some basic concepts and technologies that can help you make the right technological
+decisions in your path towards becoming a data-driven company.
+Many concepts and examples presented here are token from the excellent book
+&lt;a href=&quot;http://shop.oreilly.com/product/0636920032175.do&quot;&gt;Designing Data-Intensive Applications&lt;/a&gt; by Martin Kleppmann -
+with updates where I saw them fit.&lt;/p&gt;
+
+&lt;h2 id=&quot;concepts&quot;&gt;Concepts&lt;/h2&gt;
+
+&lt;p&gt;The technology stack of your data-driven company needs to be reliable, scalable, and maintainable.&lt;/p&gt;
+
+&lt;h3 id=&quot;reliability&quot;&gt;Reliability&lt;/h3&gt;
+
+&lt;p&gt;Data collection, storage, and access for analysis are key processes of the data-driven company that
+need to reliably work even in the face of faults.&lt;/p&gt;
+
+&lt;p&gt;Since faults (hardware faults, software errors, and human errors) always occur,
+the goal is to build fault-tolerant systems as opposed to preventing faults altogether.&lt;/p&gt;
+
+&lt;p&gt;A common approach to building fault-tolerant systems is the &lt;a href=&quot;https://github.com/Netflix/chaosmonkey&quot;&gt;Netflix chaos monkey&lt;/a&gt; toolkit
+and the related field of chaos engineering.&lt;/p&gt;
+
+&lt;h3 id=&quot;scalability&quot;&gt;Scalability&lt;/h3&gt;
+
+&lt;p&gt;Blanket statements such as “my data infrastructure scales” are not very meaningful since what we are really interested in is:
+“If the load on my data pipeline grows in a particular way, will my key quality metrics drop off a cliff or will my system cope?”&lt;/p&gt;
+
+&lt;p&gt;So to track whether your data system scales you need to do two things:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Define your load parameters: E.g. data transfer, write, or read rates at key points in your system,&lt;/li&gt;
+  &lt;li&gt;Define your performance metrics: E.g. I want my median database query to take no longer than 0.5 seconds, and my 95-percentile query no longer than 1.5 seconds.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;maintainability&quot;&gt;Maintainability&lt;/h3&gt;
+
+&lt;p&gt;All systems and data pipelines you will build on your journey to becoming a data-driven company will eventually need to be changed, updated, or upgraded.
+Your data systems will always need to evolve as your operations scale or change.&lt;/p&gt;
+
+&lt;p&gt;Three guiding principles help you set up your data systems for necessary continual evolution:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Operability: Making it easy for your operations teams to keep your data systems running - the pillars and principles of DevOps are likely key in achieving this,&lt;/li&gt;
+  &lt;li&gt;Simplicity: Removing or lowering barriers for new engineers to come on board and contribute to your data systems - often achieved through removing unnecessary complexity,&lt;/li&gt;
+  &lt;li&gt;Evolvability: Making it easy for your engineers to change your data systems to accommodate new or unanticipated use cases or requirements.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;data-models&quot;&gt;Data models&lt;/h2&gt;
+
+&lt;p&gt;The data you collect and store describe numerous concepts and entities relevant to your business.
+These concepts and entities may include:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Purchase orders&lt;/li&gt;
+  &lt;li&gt;Products and items&lt;/li&gt;
+  &lt;li&gt;Production orders&lt;/li&gt;
+  &lt;li&gt;Raw materials&lt;/li&gt;
+  &lt;li&gt;Tools and machinery&lt;/li&gt;
+  &lt;li&gt;Production lines&lt;/li&gt;
+  &lt;li&gt;Employees&lt;/li&gt;
+  &lt;li&gt;Electricity and other utility bills&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To collect and store these data points you need to decide on how to model them in your data system.&lt;/p&gt;
+
+&lt;p&gt;Depending on the properties of your business entities and - especially - the conceptual connections between
+those entities you have three basic data models to choose from.&lt;/p&gt;
+
+&lt;h3 id=&quot;relational--sql-model&quot;&gt;Relational / SQL model&lt;/h3&gt;
+
+&lt;p&gt;The relational, or SQL, model describes your business entities as tables and rows.
+Relationships between business entities are modelled as foreign keys thus allowing us to easily
+describe one-to-many relationships.
+One-to-many relationships include:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;One department has many employees assigned to it,&lt;/li&gt;
+  &lt;li&gt;One production order can have many manufacture steps assigned to it,&lt;/li&gt;
+  &lt;li&gt;One production line can have many machines or workstations assigned to it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;SQL databases routinely rely on a schema-on-write approach to defining business entity schemas:
+The schema-on-write (or statically typed) approach usually requires you to define the fields, data types, and optionally
+value ranges of your entities before you can start writing data points to your database.
+Thus this approach does not expect the schema of your business entities to change - and if it does
+change requires you to update the definitions of your database tables through a mechanism called migration.&lt;/p&gt;
+
+&lt;h3 id=&quot;document-model&quot;&gt;Document model&lt;/h3&gt;
+
+&lt;p&gt;Business entities that have no or few connections to other entities are best described with the document model.
+In the document model each data point is recorded as a closed entity with all its relevant data fields and values.
+A common and flexible format used with the document model is JSON.&lt;/p&gt;
+
+&lt;p&gt;Entities that fit this category are, among others:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Click events on your website,&lt;/li&gt;
+  &lt;li&gt;Searches or other actions performed by users,&lt;/li&gt;
+  &lt;li&gt;Time-series data of market demand or economic indicators,&lt;/li&gt;
+  &lt;li&gt;Time-series data of household energy demand.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Intricately linked to the document model is the concept of NoSQL (not only SQL) databases.
+Many NoSQL databases implement a schema-on-read (or schemaless) approach to defining business entities.
+This approach allows for more flexibility in what your database objects look like but require your data processing
+and analytics pipeline to contain more logic for handling diverging schemas.&lt;/p&gt;
+
+&lt;h3 id=&quot;graph-model&quot;&gt;Graph model&lt;/h3&gt;
+
+&lt;p&gt;The graph model describes business entities as nodes and relationships between them as edges.
+The graph model is especially useful when describing business entities that are highly linked with a plethora of many-to-many relationships.&lt;/p&gt;
+
+&lt;p&gt;Many-to-many relationships include:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;People networks where each person has numerous friends and colleagues,&lt;/li&gt;
+  &lt;li&gt;Complex production lines where each workstation is linked to many others,&lt;/li&gt;
+  &lt;li&gt;Warehouse routing networks where each aisle or storage slot is in close proximity to many others,&lt;/li&gt;
+  &lt;li&gt;Logistics networks locations are linked to many others,&lt;/li&gt;
+  &lt;li&gt;Mechanical systems such as train cars or vehicles where each mechanical components is linked to many others -
+this is likely interesting in the context of predictive maintenance and failure cascades.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://shop.oreilly.com/product/0636920032175.do&quot;&gt;Martin Kleppmann: Designing Data-Intensive Applications&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.ibm.com/blogs/business-analytics/evolution-data-driven-company/&quot;&gt;The evolution of the data-driven company&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Georg Walther</name></author><summary type="html">Introduction</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://georg.io/images/posts/kolar-io-lRoX0shwjUQ-unsplash.jpg" /><media:content medium="image" url="https://georg.io/images/posts/kolar-io-lRoX0shwjUQ-unsplash.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Decision intelligence from historical observations for optimal marketing resource use</title><link href="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing" rel="alternate" type="text/html" title="Decision intelligence from historical observations for optimal marketing resource use" /><published>2020-01-12T00:00:00-06:00</published><updated>2020-01-12T00:00:00-06:00</updated><id>https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing</id><content type="html" xml:base="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing">&lt;!--
 #################################################
 ### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
 #################################################

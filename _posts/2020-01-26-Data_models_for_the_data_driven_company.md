@@ -9,7 +9,7 @@ categories: [data-driven company, data models]
 image: images/posts/kolar-io-lRoX0shwjUQ-unsplash.jpg
 ---
 
-## Introduction
+## Data-driven company
 
 Data-driven companies generate actionable insights from their data - thus being able to take
 tractable steps guided by data.
@@ -23,7 +23,7 @@ Actionable insights guiding data-driven companies may be:
 - Our sales data indicate that offering client X will increase the likelihood of them increasing their order volume thus
   offsetting our discount favorably
 
-![](/images/posts/data_driven_company_stages.png)
+![Stages of the data-driven company](/images/posts/data_driven_company_stages.png)
 
 For enterprises to get to these actionable insights they need to collect, store, model, and analyze data appropriately.
 In this article we will explore some basic concepts and technologies that can help you make the right technological
@@ -32,7 +32,7 @@ Many concepts and examples presented here are token from the excellent book
 [Designing Data-Intensive Applications](http://shop.oreilly.com/product/0636920032175.do) by Martin Kleppmann -
 with updates where I saw them fit.
 
-## Concepts
+## Data system performance concepts
 
 The technology stack of your data-driven company needs to be reliable, scalable, and maintainable.
 

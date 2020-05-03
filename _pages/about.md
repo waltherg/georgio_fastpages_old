@@ -9,7 +9,11 @@ Hi, I'm Georg Walther and here I blog about all things tech and data that I find
 For lack of creativity, here is a rundown of the tools I use and projects I do.
 Maybe someday I'll come up with a more interesting bio.
 
-See more about me on my [LinkedIn page](https://www.linkedin.com/in/georgwalther/).
+See more about me on my [LinkedIn page](https://www.linkedin.com/in/{{ site.linkedin_username| cgi_escape | escape }}) or
+drop me a line on [Twitter](https://www.twitter.com/{{ site.twitter_username| cgi_escape | escape }}).
+
+In case you prefer speaking directly about the tech or data of your business, feel free to grab an appointment with me over at
+[Datensprechstunde](https://datensprechstunde.de/) (German) or [Data Consultation](http://dataconsultation.ai/) (English).
 
 ## Industry experience
 

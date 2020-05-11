@@ -1,6 +1,7 @@
 ---
 title: "Data system performance concepts and data models for the data-driven company"
 description: In this article we explore basic concepts your data infrastructure needs to adhere to and three data models for describing your business entities.
+published: false
 toc: true
 comments: true
 layout: post

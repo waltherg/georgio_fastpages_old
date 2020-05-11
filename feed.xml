@@ -1,150 +1,203 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-03T11:05:19-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">Data system performance concepts and data models for the data-driven company</title><link href="https://georg.io/2020/01/26/Data_models_for_the_data_driven_company" rel="alternate" type="text/html" title="Data system performance concepts and data models for the data-driven company" /><published>2020-01-26T00:00:00-06:00</published><updated>2020-01-26T00:00:00-06:00</updated><id>https://georg.io/2020/01/26/Data_models_for_the_data_driven_company</id><content type="html" xml:base="https://georg.io/2020/01/26/Data_models_for_the_data_driven_company">&lt;h2 id=&quot;data-driven-company&quot;&gt;Data-driven company&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-11T16:13:37-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">The Causality-Driven Company</title><link href="https://georg.io/2020/05/10/The_causality-driven_company" rel="alternate" type="text/html" title="The Causality-Driven Company" /><published>2020-05-10T00:00:00-05:00</published><updated>2020-05-10T00:00:00-05:00</updated><id>https://georg.io/2020/05/10/The_causality-driven_company</id><content type="html" xml:base="https://georg.io/2020/05/10/The_causality-driven_company">&lt;h2 id=&quot;the-data-driven-company&quot;&gt;The data-driven company&lt;/h2&gt;
 
-&lt;p&gt;Data-driven companies generate actionable insights from their data - thus being able to take
-tractable steps guided by data.&lt;/p&gt;
-
-&lt;p&gt;Actionable insights guiding data-driven companies may be:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Our production data show that lowering roll pressure on this machine by X bar when Y steel from Z supplier is processed will
-increase product quality by 5%&lt;/li&gt;
-  &lt;li&gt;Our procurement data prove that we should place this order with supplier X instead of supplier Y this month in order to
-save 12% on raw materials cost&lt;/li&gt;
-  &lt;li&gt;Our sales data indicate that offering client X will increase the likelihood of them increasing their order volume thus
-offsetting our discount favorably&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/posts/data_driven_company_stages.png&quot; alt=&quot;Stages of the data-driven company&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;For enterprises to get to these actionable insights they need to collect, store, model, and analyze data appropriately.
-In this article we will explore some basic concepts and technologies that can help you make the right technological
-decisions in your path towards becoming a data-driven company.
-Many concepts and examples presented here are token from the excellent book
-&lt;a href=&quot;http://shop.oreilly.com/product/0636920032175.do&quot;&gt;Designing Data-Intensive Applications&lt;/a&gt; by Martin Kleppmann -
-with updates where I saw them fit.&lt;/p&gt;
-
-&lt;h2 id=&quot;data-system-performance-concepts&quot;&gt;Data system performance concepts&lt;/h2&gt;
-
-&lt;p&gt;The technology stack of your data-driven company needs to be reliable, scalable, and maintainable.&lt;/p&gt;
-
-&lt;h3 id=&quot;reliability&quot;&gt;Reliability&lt;/h3&gt;
-
-&lt;p&gt;Data collection, storage, and access for analysis are key processes of the data-driven company that
-need to reliably work even in the face of faults.&lt;/p&gt;
-
-&lt;p&gt;Since faults (hardware faults, software errors, and human errors) always occur,
-the goal is to build fault-tolerant systems as opposed to preventing faults altogether.&lt;/p&gt;
-
-&lt;p&gt;A common approach to building fault-tolerant systems is the &lt;a href=&quot;https://github.com/Netflix/chaosmonkey&quot;&gt;Netflix chaos monkey&lt;/a&gt; toolkit
-and the related field of chaos engineering.&lt;/p&gt;
-
-&lt;h3 id=&quot;scalability&quot;&gt;Scalability&lt;/h3&gt;
-
-&lt;p&gt;Blanket statements such as “my data infrastructure scales” are not very meaningful since what we are really interested in is:
-“If the load on my data pipeline grows in a particular way, will my key quality metrics drop off a cliff or will my system cope?”&lt;/p&gt;
-
-&lt;p&gt;So to track whether your data system scales you need to do two things:&lt;/p&gt;
+&lt;p&gt;Much has been written on data being the new gold and enterprises needing to embrace big data and machine learning, enabling enterprises in three important ways:&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;Define your load parameters: E.g. data transfer, write, or read rates at key points in your system,&lt;/li&gt;
-  &lt;li&gt;Define your performance metrics: E.g. I want my median database query to take no longer than 0.5 seconds, and my 95-percentile query no longer than 1.5 seconds.&lt;/li&gt;
+  &lt;li&gt;Utilizing existing resources more efficiently thus reducing cost,&lt;/li&gt;
+  &lt;li&gt;Increasing success rates thus increasing revenue, and&lt;/li&gt;
+  &lt;li&gt;Developing entirely new business models thus diversifying their business.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&quot;maintainability&quot;&gt;Maintainability&lt;/h3&gt;
-
-&lt;p&gt;All systems and data pipelines you will build on your journey to becoming a data-driven company will eventually need to be changed, updated, or upgraded.
-Your data systems will always need to evolve as your operations scale or change.&lt;/p&gt;
-
-&lt;p&gt;Three guiding principles help you set up your data systems for necessary continual evolution:&lt;/p&gt;
+&lt;p&gt;Enterprises are said to be data-driven once their entire organization is data-first, meaning:&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;Operability: Making it easy for your operations teams to keep your data systems running - the pillars and principles of DevOps are likely key in achieving this,&lt;/li&gt;
-  &lt;li&gt;Simplicity: Removing or lowering barriers for new engineers to come on board and contribute to your data systems - often achieved through removing unnecessary complexity,&lt;/li&gt;
-  &lt;li&gt;Evolvability: Making it easy for your engineers to change your data systems to accommodate new or unanticipated use cases or requirements.&lt;/li&gt;
+  &lt;li&gt;Both their core processes (e.g. production lines) and supporting processes (e.g. recruiting) are quantifiable,&lt;/li&gt;
+  &lt;li&gt;Business and unit performance is quantifiable with transparent metrics,&lt;/li&gt;
+  &lt;li&gt;All business units have a data mindset, i.e. are driven by testable hypothesis and have the technological means to do so, and&lt;/li&gt;
+  &lt;li&gt;The entire organization, top to bottom, embraces measurability and hypothesis-driven progress.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h2 id=&quot;data-models&quot;&gt;Data models&lt;/h2&gt;
+&lt;h2 id=&quot;machine-learning-applications-for-the-data-driven-company&quot;&gt;Machine learning applications for the data-driven company&lt;/h2&gt;
 
-&lt;p&gt;The data you collect and store describe numerous concepts and entities relevant to your business.
-These concepts and entities may include:&lt;/p&gt;
+&lt;p&gt;There a numerous applications of big data and machine learning in industry and the enterprise. Common applications include:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Purchase orders&lt;/li&gt;
-  &lt;li&gt;Products and items&lt;/li&gt;
-  &lt;li&gt;Production orders&lt;/li&gt;
-  &lt;li&gt;Raw materials&lt;/li&gt;
-  &lt;li&gt;Tools and machinery&lt;/li&gt;
-  &lt;li&gt;Production lines&lt;/li&gt;
-  &lt;li&gt;Employees&lt;/li&gt;
-  &lt;li&gt;Electricity and other utility bills&lt;/li&gt;
+  &lt;li&gt;Predictive maintenance,&lt;/li&gt;
+  &lt;li&gt;Demand forecasting,&lt;/li&gt;
+  &lt;li&gt;Optimal pricing,&lt;/li&gt;
+  &lt;li&gt;Intelligent routing,&lt;/li&gt;
+  &lt;li&gt;Data-driven customer support (e.g. chatbots), amd&lt;/li&gt;
+  &lt;li&gt;Churn prediction.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;To collect and store these data points you need to decide on how to model them in your data system.&lt;/p&gt;
+&lt;p&gt;Another key application in industry is smart manufacturing which promises to decrease cost and increase both production line output and quality.&lt;/p&gt;
 
-&lt;p&gt;Depending on the properties of your business entities and - especially - the conceptual connections between
-those entities you have three basic data models to choose from.&lt;/p&gt;
+&lt;h2 id=&quot;smart-manufacturing&quot;&gt;Smart manufacturing&lt;/h2&gt;
 
-&lt;h3 id=&quot;relational--sql-model&quot;&gt;Relational / SQL model&lt;/h3&gt;
+&lt;h3 id=&quot;product-quality-prediction&quot;&gt;Product quality prediction&lt;/h3&gt;
 
-&lt;p&gt;The relational, or SQL, model describes your business entities as tables and rows.
-Relationships between business entities are modelled as foreign keys thus allowing us to easily
-describe one-to-many relationships.
-One-to-many relationships include:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/images/posts/smart_manufacturing_machine_learning.jpg&quot; alt=&quot;Smart manufacturing with machine learning&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Consider our production line, pictured above, which consists of a number of workstations that the different parts of our product need to pass through before being assembled into our final product.&lt;/p&gt;
+
+&lt;p&gt;The various workstations can be described by parameters, e.g. how much pressure or force is applied, how fast a tool is spinning, or categories such as the type of drill used.&lt;/p&gt;
+
+&lt;p&gt;Our fictional production line above has four production parameters spread across its workstations: A, B, C, and D.&lt;/p&gt;
+
+&lt;p&gt;At the far end of our production the quality of our assembled product is quantified in the quality assurance gateway (QA).
+Here, either an employee or a machine visually inspects or physically tests our product to gauge its quality.&lt;/p&gt;
+
+&lt;p&gt;Since our company is data-driven we collect data on every item coming off our production line. Such a data set may look as follows:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Product ID&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Timestamp&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;A&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;B&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;C&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;D&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;QA&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;123&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2020-05-10 14:35:00&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1.2&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;102.1&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;ZZ&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;YY&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;0.98&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;456&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2020-05-10 16:20:00&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1.1&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;104.3&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;ZZ&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;XX&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;0.96&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;789&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2020-05-11 06:04:00&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1.3&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;100.6&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;ZX&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;YY&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;0.83&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;012&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2020-05-11 10:45:00&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1.1&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;101.3&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;ZX&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;YZ&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;0.92&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;…&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Parameters A and B of our production line are numerical features while parameters C and D are categorical features.
+Our quality measurement QA is a numerical target variable which takes values between 0 and 1 with the latter representing the highest possible product quality.&lt;/p&gt;
+
+&lt;p&gt;Provided that we collect enough production line data, machine learning offers a rich toolbox for predicting either the QA score or whether it our QA score will lie above a certain threshold.
+The former case is called regression while the latter is called classification.&lt;/p&gt;
+
+&lt;p&gt;Machine learning models at our disposal include:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;One department has many employees assigned to it,&lt;/li&gt;
-  &lt;li&gt;One production order can have many manufacture steps assigned to it,&lt;/li&gt;
-  &lt;li&gt;One production line can have many machines or workstations assigned to it.&lt;/li&gt;
+  &lt;li&gt;Linear and polynomial regression,&lt;/li&gt;
+  &lt;li&gt;(Deep) neural networks / deep learning,&lt;/li&gt;
+  &lt;li&gt;Classification and regression trees (CART),&lt;/li&gt;
+  &lt;li&gt;Ensemble methods such as random forests and gradient tree boosting,&lt;/li&gt;
+  &lt;li&gt;Logistic regression,&lt;/li&gt;
+  &lt;li&gt;Support vector machines,&lt;/li&gt;
+  &lt;li&gt;Gaussian processes, and&lt;/li&gt;
+  &lt;li&gt;Naive Bayes.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;SQL databases routinely rely on a schema-on-write approach to defining business entity schemas:
-The schema-on-write (or statically typed) approach usually requires you to define the fields, data types, and optionally
-value ranges of your entities before you can start writing data points to your database.
-Thus this approach does not expect the schema of your business entities to change - and if it does
-change requires you to update the definitions of your database tables through a mechanism called migration.&lt;/p&gt;
+&lt;p&gt;These machine learning models allow us to learn the, potentially, highly complex relationship between production line parameters A, B, C, and D and product quality, QA.&lt;/p&gt;
 
-&lt;h3 id=&quot;document-model&quot;&gt;Document model&lt;/h3&gt;
+&lt;p&gt;So training a machine learning on our production line data we get something like this:&lt;/p&gt;
 
-&lt;p&gt;Business entities that have no or few connections to other entities are best described with the document model.
-In the document model each data point is recorded as a closed entity with all its relevant data fields and values.
-A common and flexible format used with the document model is JSON.&lt;/p&gt;
+&lt;p&gt;QA = model(A, B, C, D)&lt;/p&gt;
 
-&lt;p&gt;Entities that fit this category are, among others:&lt;/p&gt;
+&lt;p&gt;Where our model predicts the quality of our final product based on the parameters of our production line.&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;Click events on your website,&lt;/li&gt;
-  &lt;li&gt;Searches or other actions performed by users,&lt;/li&gt;
-  &lt;li&gt;Time-series data of market demand or economic indicators,&lt;/li&gt;
-  &lt;li&gt;Time-series data of household energy demand.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h3 id=&quot;using-our-prediction-model&quot;&gt;Using our prediction model&lt;/h3&gt;
 
-&lt;p&gt;Intricately linked to the document model is the concept of NoSQL (not only SQL) databases.
-Many NoSQL databases implement a schema-on-read (or schemaless) approach to defining business entities.
-This approach allows for more flexibility in what your database objects look like but require your data processing
-and analytics pipeline to contain more logic for handling diverging schemas.&lt;/p&gt;
+&lt;p&gt;Imagine we manage to train a highly accurate machine learning model on our production line that - what do we do with it?&lt;/p&gt;
 
-&lt;h3 id=&quot;graph-model&quot;&gt;Graph model&lt;/h3&gt;
+&lt;p&gt;Sure, if measuring the quality of our product (QA) is prohibitively expensive we could cut cost and just use our model to determine the quality score for items coming off our production line.&lt;/p&gt;
 
-&lt;p&gt;The graph model describes business entities as nodes and relationships between them as edges.
-The graph model is especially useful when describing business entities that are highly linked with a plethora of many-to-many relationships.&lt;/p&gt;
+&lt;p&gt;We could also try and adapt our model so that it provides accurate quality score predictions early in the production cycle for a given item - thus allowing us to cancel substandard items before they consume resources unnecessarily.&lt;/p&gt;
 
-&lt;p&gt;Many-to-many relationships include:&lt;/p&gt;
+&lt;p&gt;But really, what we are most likely interested in is: &lt;strong&gt;&lt;em&gt;How should I tweak individual production parameters to increase product quality?&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;People networks where each person has numerous friends and colleagues,&lt;/li&gt;
-  &lt;li&gt;Complex production lines where each workstation is linked to many others,&lt;/li&gt;
-  &lt;li&gt;Warehouse routing networks where each aisle or storage slot is in close proximity to many others,&lt;/li&gt;
-  &lt;li&gt;Logistics networks locations are linked to many others,&lt;/li&gt;
-  &lt;li&gt;Mechanical systems such as train cars or vehicles where each mechanical components is linked to many others -
-this is likely interesting in the context of predictive maintenance and failure cascades.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h3 id=&quot;issue-with-our-prediction-model&quot;&gt;Issue with our prediction model&lt;/h3&gt;
 
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;Unfortunately, our machine learning model does not allow us to answer our core question.
+Our machine learning model does not know how changing one individual production parameter affects the quality of our product.&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://shop.oreilly.com/product/0636920032175.do&quot;&gt;Martin Kleppmann: Designing Data-Intensive Applications&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.ibm.com/blogs/business-analytics/evolution-data-driven-company/&quot;&gt;The evolution of the data-driven company&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Georg Walther</name></author><summary type="html">Data-driven company</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://georg.io/images/posts/kolar-io-lRoX0shwjUQ-unsplash.jpg" /><media:content medium="image" url="https://georg.io/images/posts/kolar-io-lRoX0shwjUQ-unsplash.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Decision intelligence from historical observations for optimal marketing resource use</title><link href="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing" rel="alternate" type="text/html" title="Decision intelligence from historical observations for optimal marketing resource use" /><published>2020-01-12T00:00:00-06:00</published><updated>2020-01-12T00:00:00-06:00</updated><id>https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing</id><content type="html" xml:base="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing">&lt;!--
+&lt;p&gt;Even though we write our model as&lt;/p&gt;
+
+&lt;p&gt;QA = model(A, B, C, D)&lt;/p&gt;
+
+&lt;p&gt;what this really means is&lt;/p&gt;
+
+&lt;p&gt;QA = model(complete set of production line parameters).&lt;/p&gt;
+
+&lt;p&gt;So imagine the parameters of our production line are set to the following values:&lt;/p&gt;
+
+&lt;p&gt;A = a, B = b, C = c, and D = d or parameter set (a, b, c, d).&lt;/p&gt;
+
+&lt;p&gt;Now if we wanted to predicted the quality score of our product with parameter A increased by 10%, i.e.&lt;/p&gt;
+
+&lt;p&gt;(1.1 x a, b, c, d)&lt;/p&gt;
+
+&lt;p&gt;then we would need to hope that we already produced an item with parameters very similar to all four target parameter values, i.e. (1.1 x a, b, c, d), otherwise our model would provide us with, possibly, widely inaccurate predictions of our quality score.&lt;/p&gt;
+
+&lt;p&gt;In essence: &lt;strong&gt;&lt;em&gt;Our machine learning model learns the relationship between the entire set of production parameters and quality score - hence our model does not learn the individual contribution of each production parameter on the quality score.&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This issue pertains to all machine learning models: They learn the bulk - not individual - contribution of all observable input variables (or features) to the target value.&lt;/p&gt;
+
+&lt;h2 id=&quot;missing-piece-causality&quot;&gt;Missing piece: Causality&lt;/h2&gt;
+
+&lt;h3 id=&quot;causal-inference-for-quality-improvement&quot;&gt;Causal inference for quality improvement&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/smart_manufacturing_causal_inference.jpg&quot; alt=&quot;Smart manufacturing with machine learning&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;nomenclature-of-causality&quot;&gt;Nomenclature of causality&lt;/h3&gt;
+
+&lt;p&gt;Causal model, causal inference, causal discovery&lt;/p&gt;
+
+&lt;h3 id=&quot;common-pitfalls-uncovered-by-causality-considerations&quot;&gt;Common pitfalls uncovered by causality considerations&lt;/h3&gt;
+
+&lt;h2 id=&quot;becoming-a-causality-driven-company&quot;&gt;Becoming a causality-driven company&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/posts/evolution_causality_driven_company.png&quot;&gt;&lt;img src=&quot;/images/posts/evolution_causality_driven_company.png&quot; alt=&quot;Evolution of the causality-driven company&quot; /&gt;&lt;/a&gt;&lt;/p&gt;</content><author><name>Georg Walther</name></author><summary type="html">The data-driven company</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://georg.io/images/posts/evolution_causality_driven_company.png" /><media:content medium="image" url="https://georg.io/images/posts/evolution_causality_driven_company.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Decision intelligence from historical observations for optimal marketing resource use</title><link href="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing" rel="alternate" type="text/html" title="Decision intelligence from historical observations for optimal marketing resource use" /><published>2020-01-12T00:00:00-06:00</published><updated>2020-01-12T00:00:00-06:00</updated><id>https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing</id><content type="html" xml:base="https://georg.io/2020/01/12/Optimal_resource_allocation_and_uplift_for_direct_marketing">&lt;!--
 #################################################
 ### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
 #################################################

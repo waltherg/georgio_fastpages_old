@@ -1,6 +1,7 @@
 ---
 title: The Causality-Driven Company
 description: Increasingly, enterprises embrace decision-making based on data, thus becoming a data-driven company. However, decisions based purely on data can lead to mistakes and may waste resources. Combining causal models with data promises to fix these issues. In this article I explain why the causality-driven company is the sensible step up from the data-driven company.
+hidden: true
 permalink: /the_causality-driven_company
 toc: true
 comments: true

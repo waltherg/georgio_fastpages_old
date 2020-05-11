@@ -1,7 +1,7 @@
 ---
 title: The Causality-Driven Company
 description: Increasingly, enterprises embrace decision-making based on data, thus becoming a data-driven company. However, decisions based purely on data can lead to mistakes and may waste resources. Combining causal models with data promises to fix these issues. In this article I explain why the causality-driven company is the sensible step up from the data-driven company.
-hidden: true
+permalink: /the_causality-driven_company
 toc: true
 comments: true
 layout: post
@@ -128,9 +128,29 @@ This issue pertains to all machine learning models: They learn the bulk - not in
 
 ## Missing piece: Causality
 
-### Causal inference for quality improvement
+### Issues arising from causal dependence
 
 ![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_causal_inference.jpg)
+
+A major problem with the "bulk contributions" that machine learning models learn is the fact that oftentimes the variables we measure to predict target variables influence one another.
+
+Consider our fictional production line again, however we now draw arrows between our four production parameters that indicate how these parameters influence one another.
+
+For instance, parameter A influences parameters B and C: Imagine parameter A is the temperature some metal component is moulded at thus influencing the amount of pressure that needs to be applied on it in workstation B and the type of drill required to bore a hole into it in workstation C.
+
+The causal model of our fictional production line showcases a number of ways that our expectation of machine learning models fail:
+
+- Parameter A does not have any direct impact on our target variable QA thus bearing the question whether modifying A in isolation is worthwhile our resources,
+- Parameter A influences QA via three indirect routes (A -> C -> QA, A -> C -> B -> QA, and A -> B -> QA) thus making it highly likely that changing A in isolation has highly complex and opaque impact on QA making it hard for us to understand how to adjust A for optimal QA,
+- Parameter C influences our target QA both directly and indirectly (via B) thus begging the question whether the direct or the indirect route has greater influence.
+
+### Causal inference toolset
+
+Causal inference offers a toolset that helps us disentangle causal structures and understand the impact of individual input variables: Do-Calculus.
+
+Do-calculus encompasses a set of rules that allow us to ask questions such as: "How will the quality score QA of my product change if I increase production parameter A by 10%".
+
+QA = model(do(A = 1.1 x a), b, c, d)
 
 ### Nomenclature of causality
 

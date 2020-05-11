@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-11T16:13:37-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">The Causality-Driven Company</title><link href="https://georg.io/2020/05/10/The_causality-driven_company" rel="alternate" type="text/html" title="The Causality-Driven Company" /><published>2020-05-10T00:00:00-05:00</published><updated>2020-05-10T00:00:00-05:00</updated><id>https://georg.io/2020/05/10/The_causality-driven_company</id><content type="html" xml:base="https://georg.io/2020/05/10/The_causality-driven_company">&lt;h2 id=&quot;the-data-driven-company&quot;&gt;The data-driven company&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-11T18:41:57-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">The Causality-Driven Company</title><link href="https://georg.io/the_causality-driven_company" rel="alternate" type="text/html" title="The Causality-Driven Company" /><published>2020-05-10T00:00:00-05:00</published><updated>2020-05-10T00:00:00-05:00</updated><id>https://georg.io/The_causality-driven_company</id><content type="html" xml:base="https://georg.io/the_causality-driven_company">&lt;h2 id=&quot;the-data-driven-company&quot;&gt;The data-driven company&lt;/h2&gt;
 
 &lt;p&gt;Much has been written on data being the new gold and enterprises needing to embrace big data and machine learning, enabling enterprises in three important ways:&lt;/p&gt;
 
@@ -185,9 +185,31 @@ Our machine learning model does not know how changing one individual production 
 
 &lt;h2 id=&quot;missing-piece-causality&quot;&gt;Missing piece: Causality&lt;/h2&gt;
 
-&lt;h3 id=&quot;causal-inference-for-quality-improvement&quot;&gt;Causal inference for quality improvement&lt;/h3&gt;
+&lt;h3 id=&quot;issues-arising-from-causal-dependence&quot;&gt;Issues arising from causal dependence&lt;/h3&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/posts/smart_manufacturing_causal_inference.jpg&quot; alt=&quot;Smart manufacturing with machine learning&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A major problem with the “bulk contributions” that machine learning models learn is the fact that oftentimes the variables we measure to predict target variables influence one another.&lt;/p&gt;
+
+&lt;p&gt;Consider our fictional production line again, however we now draw arrows between our four production parameters that indicate how these parameters influence one another.&lt;/p&gt;
+
+&lt;p&gt;For instance, parameter A influences parameters B and C: Imagine parameter A is the temperature some metal component is moulded at thus influencing the amount of pressure that needs to be applied on it in workstation B and the type of drill required to bore a hole into it in workstation C.&lt;/p&gt;
+
+&lt;p&gt;The causal model of our fictional production line showcases a number of ways that our expectation of machine learning models fail:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Parameter A does not have any direct impact on our target variable QA thus bearing the question whether modifying A in isolation is worthwhile our resources,&lt;/li&gt;
+  &lt;li&gt;Parameter A influences QA via three indirect routes (A -&amp;gt; C -&amp;gt; QA, A -&amp;gt; C -&amp;gt; B -&amp;gt; QA, and A -&amp;gt; B -&amp;gt; QA) thus making it highly likely that changing A in isolation has highly complex and opaque impact on QA making it hard for us to understand how to adjust A for optimal QA,&lt;/li&gt;
+  &lt;li&gt;Parameter C influences our target QA both directly and indirectly (via B) thus begging the question whether the direct or the indirect route has greater influence.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;causal-inference-toolset&quot;&gt;Causal inference toolset&lt;/h3&gt;
+
+&lt;p&gt;Causal inference offers a toolset that helps us disentangle causal structures and understand the impact of individual input variables: Do-Calculus.&lt;/p&gt;
+
+&lt;p&gt;Do-calculus encompasses a set of rules that allow us to ask questions such as: “How will the quality score QA of my product change if I increase production parameter A by 10%”.&lt;/p&gt;
+
+&lt;p&gt;QA = model(do(A = 1.1 x a), b, c, d)&lt;/p&gt;
 
 &lt;h3 id=&quot;nomenclature-of-causality&quot;&gt;Nomenclature of causality&lt;/h3&gt;
 

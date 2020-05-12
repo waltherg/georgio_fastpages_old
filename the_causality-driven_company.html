@@ -142,7 +142,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      6 min read
+      8 min read
     
 </span></p>
 
@@ -177,9 +177,10 @@ window.onload = wrap_img;
 <li class="toc-entry toc-h3"><a href="#issue-with-our-prediction-model">Issue with our prediction model</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#missing-piece-causality">Missing piece: Causality</a>
+<li class="toc-entry toc-h2"><a href="#the-missing-piece-causality">The missing piece: causality</a>
 <ul>
-<li class="toc-entry toc-h3"><a href="#issues-arising-from-causal-dependence">Issues arising from causal dependence</a></li>
+<li class="toc-entry toc-h3"><a href="#what-is-causality">What is causality?</a></li>
+<li class="toc-entry toc-h3"><a href="#the-issue-with-causality-machine-learning-models-cannot-help-us-predict-impact-of-surgical-changes">The issue with causality: Machine learning models cannot help us predict impact of surgical changes</a></li>
 <li class="toc-entry toc-h3"><a href="#causal-inference-toolset">Causal inference toolset</a></li>
 <li class="toc-entry toc-h3"><a href="#nomenclature-of-causality">Nomenclature of causality</a></li>
 <li class="toc-entry toc-h3"><a href="#common-pitfalls-uncovered-by-causality-considerations">Common pitfalls uncovered by causality considerations</a></li>
@@ -373,31 +374,57 @@ Our machine learning model does not know how changing one individual production 
 
 <p>then we would need to hope that we already produced an item with parameters very similar to all four target parameter values, i.e. (1.1 x a, b, c, d), otherwise our model would provide us with, possibly, widely inaccurate predictions of our quality score.</p>
 
-<p>In essence: <strong><em>Our machine learning model learns the relationship between the entire set of production parameters and quality score - hence our model does not learn the individual contribution of each production parameter on the quality score.</em></strong></p>
+<p>In essence: <strong><em>Our machine learning model learns the relationship between the entire set of production parameters and quality score - hence our model does not learn the individual impact of each production parameter on the quality score.</em></strong></p>
 
 <p>This issue pertains to all machine learning models: They learn the bulk - not individual - contribution of all observable input variables (or features) to the target value.</p>
 
-<h2 id="missing-piece-causality">
-<a class="anchor" href="#missing-piece-causality" aria-hidden="true"><span class="octicon octicon-link"></span></a>Missing piece: Causality</h2>
+<h2 id="the-missing-piece-causality">
+<a class="anchor" href="#the-missing-piece-causality" aria-hidden="true"><span class="octicon octicon-link"></span></a>The missing piece: causality</h2>
 
-<h3 id="issues-arising-from-causal-dependence">
-<a class="anchor" href="#issues-arising-from-causal-dependence" aria-hidden="true"><span class="octicon octicon-link"></span></a>Issues arising from causal dependence</h3>
+<h3 id="what-is-causality">
+<a class="anchor" href="#what-is-causality" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is causality?</h3>
+
+<p>To disentangle their individual contributions, we first need to account for how our production parameters influence one another and the quality score.</p>
+
+<p>To understand the connections between the parameters of our production line and the quality score we pop down to the production floor and chat with our colleagues manning the individual workstations and their foremen.
+From them we learn that:</p>
+
+<ul>
+  <li>When the stiffness of the raw material (A) increases then downstream workers increase the pressure applied on the item (B),</li>
+  <li>Depending on the stiffness of the raw material (A) the type of downstream drill (C) is chosen,</li>
+  <li>The worker choosing the type of drill (C) also informs the worker pressing our item (B) since they need to balance bore friction and metal stiffness,</li>
+  <li>The worker applying a durable finish (D) to our product is not affected by the choices of their co-workers.</li>
+</ul>
+
+<p>Armed with these insights from our production floor we draw up the following causal model - showing the connections among our production parameters and the quality of our product:</p>
 
 <p><img src="/images/posts/smart_manufacturing_causal_inference.jpg" alt="Smart manufacturing with machine learning"></p>
 
-<p>A major problem with the “bulk contributions” that machine learning models learn is the fact that oftentimes the variables we measure to predict target variables influence one another.</p>
+<h3 id="the-issue-with-causality-machine-learning-models-cannot-help-us-predict-impact-of-surgical-changes">
+<a class="anchor" href="#the-issue-with-causality-machine-learning-models-cannot-help-us-predict-impact-of-surgical-changes" aria-hidden="true"><span class="octicon octicon-link"></span></a>The issue with causality: Machine learning models cannot help us predict impact of surgical changes</h3>
 
-<p>Consider our fictional production line again, however we now draw arrows between our four production parameters that indicate how these parameters influence one another.</p>
+<p>One of our main uses for machine learning models is predicting the effect of isolated changes to our processes or organization.</p>
 
-<p>For instance, parameter A influences parameters B and C: Imagine parameter A is the temperature some metal component is moulded at thus influencing the amount of pressure that needs to be applied on it in workstation B and the type of drill required to bore a hole into it in workstation C.</p>
+<p>However, since the processes that generate the data we train machine learning models on are oftentimes structured our models cannot learn the impact of isolated changes to the data-generating process.</p>
 
-<p>The causal model of our fictional production line showcases a number of ways that our expectation of machine learning models fail:</p>
+<p>Take the causal model describing our production line as an example:</p>
 
 <ul>
-  <li>Parameter A does not have any direct impact on our target variable QA thus bearing the question whether modifying A in isolation is worthwhile our resources,</li>
-  <li>Parameter A influences QA via three indirect routes (A -&gt; C -&gt; QA, A -&gt; C -&gt; B -&gt; QA, and A -&gt; B -&gt; QA) thus making it highly likely that changing A in isolation has highly complex and opaque impact on QA making it hard for us to understand how to adjust A for optimal QA,</li>
-  <li>Parameter C influences our target QA both directly and indirectly (via B) thus begging the question whether the direct or the indirect route has greater influence.</li>
+  <li>In reality, parameter A does not affect QA directly but only indirectly via B and C - thus in our recorded production data these three variables are always coupled i.e. change in tandem,</li>
+  <li>Parameter B is dependent on C so our observed data set likely does not include data points where parameter B is tweaked in isolation.</li>
 </ul>
+
+<p>Now, we could say “We’ll just go down to the production floor and run experiments where we alter individual parameters in isolation and record the output quality score”.</p>
+
+<p>This approach, called randomized experiment or randomized controlled trial, is oftentimes undesirable or simply impossible:</p>
+
+<ol>
+  <li>In the case of our production line (and smart manufacturing in general), randomly assigning production parameters to measure their individual impact would be both very time consuming and prohibitively expensive - imagine all the low-quality items that would come off the production line,</li>
+  <li>In e-commerce, for smart pricing, it is in fact prohibited by law to price the same item differently for different customers in the same market thus making,</li>
+  <li>In customer care it would be highly undesirable to treat some customers potentially poorly just to see how their purchase behavior changes,</li>
+  <li>In predictive maintenance it would be questionable or prohibited not to perform best practice maintenance steps on individual items to see how their performance deteriorates differently, and</li>
+  <li>In online marketing it is ofentimes prohibitively complex, or impossible since the introduction of GDPR, to cleanly understand the effects of isolated marketing parameters on individual users.</li>
+</ol>
 
 <h3 id="causal-inference-toolset">
 <a class="anchor" href="#causal-inference-toolset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Causal inference toolset</h3>

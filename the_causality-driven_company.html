@@ -179,9 +179,9 @@ window.onload = wrap_img;
 </li>
 <li class="toc-entry toc-h2"><a href="#the-missing-piece-causality">The missing piece: causality</a>
 <ul>
-<li class="toc-entry toc-h3"><a href="#what-is-causality">What is causality?</a></li>
+<li class="toc-entry toc-h3"><a href="#in-reality-variables-and-parameters-are-often-connected">In reality, variables and parameters are often connected</a></li>
 <li class="toc-entry toc-h3"><a href="#the-issue-with-causality-machine-learning-models-cannot-help-us-predict-impact-of-surgical-changes">The issue with causality: Machine learning models cannot help us predict impact of surgical changes</a></li>
-<li class="toc-entry toc-h3"><a href="#causal-inference-toolset">Causal inference toolset</a></li>
+<li class="toc-entry toc-h3"><a href="#causal-inference-toolset-do-calculus">Causal inference toolset: Do-calculus</a></li>
 <li class="toc-entry toc-h3"><a href="#nomenclature-of-causality">Nomenclature of causality</a></li>
 <li class="toc-entry toc-h3"><a href="#common-pitfalls-uncovered-by-causality-considerations">Common pitfalls uncovered by causality considerations</a></li>
 </ul>
@@ -381,8 +381,8 @@ Our machine learning model does not know how changing one individual production 
 <h2 id="the-missing-piece-causality">
 <a class="anchor" href="#the-missing-piece-causality" aria-hidden="true"><span class="octicon octicon-link"></span></a>The missing piece: causality</h2>
 
-<h3 id="what-is-causality">
-<a class="anchor" href="#what-is-causality" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is causality?</h3>
+<h3 id="in-reality-variables-and-parameters-are-often-connected">
+<a class="anchor" href="#in-reality-variables-and-parameters-are-often-connected" aria-hidden="true"><span class="octicon octicon-link"></span></a>In reality, variables and parameters are often connected</h3>
 
 <p>To disentangle their individual contributions, we first need to account for how our production parameters influence one another and the quality score.</p>
 
@@ -426,8 +426,19 @@ From them we learn that:</p>
   <li>In online marketing it is ofentimes prohibitively complex, or impossible since the introduction of GDPR, to cleanly understand the effects of isolated marketing parameters on individual users.</li>
 </ol>
 
-<h3 id="causal-inference-toolset">
-<a class="anchor" href="#causal-inference-toolset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Causal inference toolset</h3>
+<p>So, instead of carrying out expensive experiments on our production line to generate what is called interventional data, we will use the production data we already collected (observational data) and apply a specific framework to understand fine-tuning our production line.</p>
+
+<h3 id="causal-inference-toolset-do-calculus">
+<a class="anchor" href="#causal-inference-toolset-do-calculus" aria-hidden="true"><span class="octicon octicon-link"></span></a>Causal inference toolset: Do-calculus</h3>
+
+<p><img src="/images/posts/smart_manufacturing_intervention.jpg" alt="Smart manufacturing with machine learning" title="Figure 3: Theoretical randomized experiment where we advise our worker in workstation B to apply random amounts of pressure 'b' instead of aliging their work with workstations A and C."></p>
+
+<p>Causal inference offers a set of tools that allows us to simulate randomized experiments:</p>
+
+<ul>
+  <li>Do-calculus</li>
+  <li>…</li>
+</ul>
 
 <p>Causal inference offers a toolset that helps us disentangle causal structures and understand the impact of individual input variables: Do-Calculus.</p>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-12T03:30:54-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">The Causality-Driven Company</title><link href="https://georg.io/the_causality-driven_company" rel="alternate" type="text/html" title="The Causality-Driven Company" /><published>2020-05-10T00:00:00-05:00</published><updated>2020-05-10T00:00:00-05:00</updated><id>https://georg.io/The_causality-driven_company</id><content type="html" xml:base="https://georg.io/the_causality-driven_company">&lt;h2 id=&quot;the-data-driven-company&quot;&gt;The data-driven company&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="https://georg.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://georg.io/" rel="alternate" type="text/html" /><updated>2020-05-13T11:59:45-05:00</updated><id>https://georg.io/feed.xml</id><title type="html">georg.io</title><subtitle>My personal blog on tech and data</subtitle><entry><title type="html">The Causality-Driven Company</title><link href="https://georg.io/the_causality-driven_company" rel="alternate" type="text/html" title="The Causality-Driven Company" /><published>2020-05-10T00:00:00-05:00</published><updated>2020-05-10T00:00:00-05:00</updated><id>https://georg.io/The_causality-driven_company</id><content type="html" xml:base="https://georg.io/the_causality-driven_company">&lt;h2 id=&quot;the-data-driven-company&quot;&gt;The data-driven company&lt;/h2&gt;
 
 &lt;p&gt;Much has been written on data being the new gold and enterprises needing to embrace big data and machine learning, enabling enterprises in three important ways:&lt;/p&gt;
 
@@ -185,7 +185,7 @@ Our machine learning model does not know how changing one individual production 
 
 &lt;h2 id=&quot;the-missing-piece-causality&quot;&gt;The missing piece: causality&lt;/h2&gt;
 
-&lt;h3 id=&quot;what-is-causality&quot;&gt;What is causality?&lt;/h3&gt;
+&lt;h3 id=&quot;in-reality-variables-and-parameters-are-often-connected&quot;&gt;In reality, variables and parameters are often connected&lt;/h3&gt;
 
 &lt;p&gt;To disentangle their individual contributions, we first need to account for how our production parameters influence one another and the quality score.&lt;/p&gt;
 
@@ -228,7 +228,18 @@ From them we learn that:&lt;/p&gt;
   &lt;li&gt;In online marketing it is ofentimes prohibitively complex, or impossible since the introduction of GDPR, to cleanly understand the effects of isolated marketing parameters on individual users.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&quot;causal-inference-toolset&quot;&gt;Causal inference toolset&lt;/h3&gt;
+&lt;p&gt;So, instead of carrying out expensive experiments on our production line to generate what is called interventional data, we will use the production data we already collected (observational data) and apply a specific framework to understand fine-tuning our production line.&lt;/p&gt;
+
+&lt;h3 id=&quot;causal-inference-toolset-do-calculus&quot;&gt;Causal inference toolset: Do-calculus&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/posts/smart_manufacturing_intervention.jpg&quot; alt=&quot;Smart manufacturing with machine learning&quot; title=&quot;Figure 3: Theoretical randomized experiment where we advise our worker in workstation B to apply random amounts of pressure 'b' instead of aliging their work with workstations A and C.&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Causal inference offers a set of tools that allows us to simulate randomized experiments:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Do-calculus&lt;/li&gt;
+  &lt;li&gt;…&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;Causal inference offers a toolset that helps us disentangle causal structures and understand the impact of individual input variables: Do-Calculus.&lt;/p&gt;
 

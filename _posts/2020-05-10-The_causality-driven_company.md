@@ -129,7 +129,7 @@ This issue pertains to all machine learning models: They learn the bulk - not in
 
 ## The missing piece: causality
 
-### What is causality?
+### In reality, variables and parameters are often connected
 
 To disentangle their individual contributions, we first need to account for how our production parameters influence one another and the quality score.
 
@@ -166,7 +166,16 @@ This approach, called randomized experiment or randomized controlled trial, is o
 4. In predictive maintenance it would be questionable or prohibited not to perform best practice maintenance steps on individual items to see how their performance deteriorates differently, and
 5. In online marketing it is ofentimes prohibitively complex, or impossible since the introduction of GDPR, to cleanly understand the effects of isolated marketing parameters on individual users.
 
-### Causal inference toolset
+So, instead of carrying out expensive experiments on our production line to generate what is called interventional data, we will use the production data we already collected (observational data) and apply a specific framework to understand fine-tuning our production line.
+
+### Causal inference toolset: Do-calculus
+
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 3: Theoretical randomized experiment where we advise our worker in workstation B to apply random amounts of pressure 'b' instead of aliging their work with workstations A and C.")
+
+Causal inference offers a set of tools that allows us to simulate randomized experiments:
+
+- Do-calculus
+- ...
 
 Causal inference offers a toolset that helps us disentangle causal structures and understand the impact of individual input variables: Do-Calculus.
 

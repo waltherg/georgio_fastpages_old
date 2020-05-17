@@ -43,7 +43,7 @@ Another key application in industry is smart manufacturing which promises to dec
 
 ### Product quality prediction
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_machine_learning.jpg)
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_machine_learning.jpg "Figure 1: Production floor indicating production parameters $$A$$, $$B$$, $$C$$, and $$D$$ alongside resultant quality score $$\verb!QA!$$ of items coming off the production line.")
 
 Consider our production line, pictured above, which consists of a number of workstations that the different parts of our product need to pass through before being assembled into our final product.
 
@@ -84,6 +84,8 @@ Machine learning models at our disposal include:
 
 These machine learning models allow us to learn the, potentially, highly complex relationship between production line parameters A, B, C, and D and product quality, QA.
 
+These are also the same models used routinely to implement the aforementioned industry applications such as demand forecasting or churn prediction.
+
 So training a machine learning on our production line data we get something like this:
 
 QA = model(A, B, C, D)
@@ -102,71 +104,89 @@ But really, what we are most likely interested in is: ***How should I tweak indi
 
 ### Issue with our prediction model
 
-Unfortunately, our machine learning model does not allow us to answer our core question.
-Our machine learning model does not know how changing one individual production parameter affects the quality of our product.
+Unfortunately, our machine learning model does not hold the answer to our core question -
+out of the box it will not help us optimize individual production parameters to improve our quality score.
 
-Even though we write our model as
+Let's see why that is.
 
-QA = model(A, B, C, D)
+We can write our machine learning model as a function:
 
-what this really means is
+$$ \verb!QA! = f(A, B, C, D), $$
 
-QA = model(complete set of production line parameters).
+where $$ f $$ is our model that predicts the quality score for items manufactured with production parameters
+$$A$$, $$B$$, $$C$$, and $$D$$.
 
-So imagine the parameters of our production line are set to the following values:
+The issue with this model is that it learned the relationship between quality score and production parameters "in bulk" - or the joint distribution of $$ \verb!QA! $$ and production parameters $$A$$, $$B$$, $$C$$, and $$D$$.
 
-A = a, B = b, C = c, and D = d or parameter set (a, b, c, d).
+In practice this means that we cannot tweak one of the production parameters in isolation, pop them into our
+machine learning model $$f$$, and expect a sensible prediction of the expected quality score for items manufactured under these conditions.
 
-Now if we wanted to predicted the quality score of our product with parameter A increased by 10%, i.e.
+The only sensible operation we can carry out with this model is asking all production line workers for their presently (or planned) production parameters, inputting them into our model, and informing our colleagues in production of the expected quality score.
 
-(1.1 x a, b, c, d)
+Of course, a far more desirable operation would be to take the presently used production parameters, e.g.
 
-then we would need to hope that we already produced an item with parameters very similar to all four target parameter values, i.e. (1.1 x a, b, c, d), otherwise our model would provide us with, possibly, widely inaccurate predictions of our quality score.
+$$ (A, B, C, D) = (a, b, c, d),$$
 
-In essence: ***Our machine learning model learns the relationship between the entire set of production parameters and quality score - hence our model does not learn the individual impact of each production parameter on the quality score.***
+tweak a single parameter, e.g. increase parameter $$B$$ by 10%, and compute the newly expected quality score
 
-This issue pertains to all machine learning models: They learn the bulk - not individual - contribution of all observable input variables (or features) to the target value.
+$$\verb!QA modified! = f(a, 1.1 \cdot b, c, d).$$
+
+If the newly predicted $$\verb!QA modified!$$ turns out greater than the presently achieved or predicted quality score we would go down the production floor and ask our colleague manning the workstation to increase their parameter $$B$$ by 10%.
+
+In essence: Our machine learning model learns the bulk relationship between the entire set of production parameters and quality score, and not the individual impact of each production parameter on the quality score.
+This problem pertains to most machine learning models independent of the specific problem tackled.
+
+How do we modify our machine learning model so that we can estimate the impact of individual production parameter modifications and help our colleagues on the production floor make optimal, surgical changes to their manufacturing process?
+
+One major piece to closing this gap is causality.
 
 ## The missing piece: causality
 
-### In reality, variables and parameters are often connected
+### In reality, variables and parameters are often interconnected
 
 To disentangle their individual contributions, we first need to account for how our production parameters influence one another and the quality score.
 
-To understand the connections between the parameters of our production line and the quality score we pop down to the production floor and chat with our colleagues manning the individual workstations and their foremen.
+To understand the connections between the parameters of our production line and the quality score we pop down to the production floor and chat with our colleagues manning the individual workstations.
 From them we learn that:
 
 - When the stiffness of the raw material (A) increases then downstream workers increase the pressure applied on the item (B),
 - Depending on the stiffness of the raw material (A) the type of downstream drill (C) is chosen,
-- The worker choosing the type of drill (C) also informs the worker pressing our item (B) since they need to balance bore friction and metal stiffness,
+- The worker choosing the type of drill (C) also informs the worker moulding our item under pressure (B) since they need to balance bore friction and metal stiffness,
 - The worker applying a durable finish (D) to our product is not affected by the choices of their co-workers.
 
 Armed with these insights from our production floor we draw up the following causal model - showing the connections among our production parameters and the quality of our product:
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_causal_inference.jpg)
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 2: Production line with interconnection between production parameters indicated by arrows. Production parameters are linked due to practical considerations and experience of production floor workers.")
 
-### The issue with causality: Machine learning models cannot help us predict impact of surgical changes
+### Interconnected input variables void use of machine learning models for individual impact analysis
 
-One of our main uses for machine learning models is predicting the effect of isolated changes to our processes or organization.
+One of our main uses for a machine learning model that predicts the eventual quality score of manufactured items is to support our colleagues on the production floor in optimizing their individual production parameters to maximize our overall output quality.
 
-However, since the processes that generate the data we train machine learning models on are oftentimes structured our models cannot learn the impact of isolated changes to the data-generating process.
+However, our causal model (Figure 2) makes it apparent that our model should be a lot more complex that previously thought. The connections in our causal model indicate that we should write our model as
 
-Take the causal model describing our production line as an example:
+$$ \verb!QA! = f(g(A, h(A)), h(A), D), $$
 
-- In reality, parameter A does not affect QA directly but only indirectly via B and C - thus in our recorded production data these three variables are always coupled i.e. change in tandem,
-- Parameter B is dependent on C so our observed data set likely does not include data points where parameter B is tweaked in isolation.
+where both $$B$$ and $$C$$ are functions of $$A$$.
 
-Now, we could say "We'll just go down to the production floor and run experiments where we alter individual parameters in isolation and record the output quality score".
+In short: In addition to teaching our machine learning model the relationship between our four production parameters and the quality score, we also need to teach our model the various relationships between our production parameters before we can use our model to optimize individual workstations.
 
-This approach, called randomized experiment or randomized controlled trial, is oftentimes undesirable or simply impossible:
+Now, we may be inclined to just go down to the production floor and start experimenting at random with our production parameters generating enough data to learn both the interconnections between production parameters ($$B = g(A, C)$$, $$C = h(A)$$) and their individual impact on our quality score $$\verb!QA!$$.
+
+However, each manufactured item with substandard quality due to a randomly selected combination of production parameters means money down the drain for your company.
+
+This approach, called randomized experiment or randomized controlled trial, actually is oftentimes undesirable or simply impossible:
 
 1. In the case of our production line (and smart manufacturing in general), randomly assigning production parameters to measure their individual impact would be both very time consuming and prohibitively expensive - imagine all the low-quality items that would come off the production line,
-2. In e-commerce, for smart pricing, it is in fact prohibited by law to price the same item differently for different customers in the same market thus making,
-3. In customer care it would be highly undesirable to treat some customers potentially poorly just to see how their purchase behavior changes,
-4. In predictive maintenance it would be questionable or prohibited not to perform best practice maintenance steps on individual items to see how their performance deteriorates differently, and
+2. In e-commerce, for smart pricing, it is in fact prohibited by law to price the same item differently for different customers in the same market,
+3. In customer care it would be highly undesirable to treat some customers poorly just to see how their purchase behavior or loyalty changes,
+4. In predictive maintenance it would be questionable or prohibited not to perform best practice maintenance steps on individual items to see how they deteriorate differently, and
 5. In online marketing it is ofentimes prohibitively complex, or impossible since the introduction of GDPR, to cleanly understand the effects of isolated marketing parameters on individual users.
 
-So, instead of carrying out expensive experiments on our production line to generate what is called interventional data, we will use the production data we already collected (observational data) and apply a specific framework to understand fine-tuning our production line.
+Hence, we cannot rely on randomized experiments to understand how to optimally help our production floor colleagues - just as we cannot rely on these experiments (and their resultant interventional data) in many other scenarios.
+
+So what we are left with is continue doing what we do on the production floor, and use the data generated under normal operating conditions (observational data) to estimate the impact of each production parameter individually on our quality score.
+
+To achieve this we need to rely on both our causal model (Figure 2) and a toolset from the field of causal inference called do-calculus.
 
 ### Causal inference toolset: Do-calculus
 

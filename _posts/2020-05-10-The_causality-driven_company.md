@@ -220,8 +220,6 @@ With this toolset we can finally estimate the individual effect of tweaking prod
 
 ## Becoming a causality-driven company
 
-Thank you for reading this far.
-
 I hope I managed to convince you of the important difference between recording lots of data and being able to optimize individual steps of your business operations based on those data.
 
 The former implies being able to predict, and optimize, business outcomes if the web of decisions or variables leading to those outcomes are operated as usual - this is the essence of the data-driven company.

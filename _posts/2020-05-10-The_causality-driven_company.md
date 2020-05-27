@@ -134,7 +134,9 @@ If the newly predicted $$\verb!QA modified!$$ turns out greater than the present
 
 Unfortunately, this operation of tweaking and optimizing individual input variables (production parameters) is not supported by our machine learning model.
 
-In essence, our model learns the bulk relationship between the entire set of production parameters and quality score, and not the individual impact of each production parameter on the quality score.
+In essence, our model learns the bulk relationship between the entire set of production parameters and quality score, and not the individual impact of each production parameter on the quality score - as illustrated in the following sketch:
+
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_bulk_parameters.jpg "Figure 2: We expect our machine learning model to learn the impact of each production parameter on the quality score QA individually - after all we write our model as a function f(a, b, c, d) with each parameter spelled out individually. However, what our machine learning model really learns is the bulk influence of our production parameters on quality score QA - essentially we learn the joint relationship between QA and a four-dimensional variable made up of our production parameters.")
 
 This problem pertains to most machine learning models independent of the specific problem tackled.
 
@@ -158,13 +160,16 @@ From them we learn that:
 
 Armed with these insights from our production floor we draw up the following causal model - showing the connections among our production parameters and the quality score of our product:
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 2: Production line with causal linkes between production parameters indicated by arrows. Production parameters are linked due to practical considerations and the experience of production floor workers.")
+![Smart manufacturing with machine learning: expected of model and provided by model.](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 3: Production line with causal links between production parameters indicated by arrows. Production parameters are linked due to practical considerations and the experience of production floor workers. Note: This kind of graph is referred to as a causal model.")
+
+A simplistic, and perhaps crude, way of interpreting the arrows between parameters $$A$$, $$B$$, and $$C$$ is to imagine these arrows were unidirectional mechanical springs.
+If I pull on parameter $$A$$ by changing it somehow, I also move around parameters $$B$$ and $$C$$ - however pulling on $$C$$ does not affect $$A$$ as our spring is unidirectional.
 
 ### Interconnected variables are hard to disentangle
 
 One of our main uses for a machine learning model that predicts the eventual quality score of manufactured items is to support our colleagues on the production floor in optimizing their individual production parameters to maximize our overall output quality.
 
-However, our causal model (Figure 2) makes it apparent that our model should be a lot more complex that previously thought. The connections in our causal model indicate that we should write our model as
+However, our causal model (Figure 3) makes it apparent that our model should be a lot more complex that previously thought. The connections in our causal model indicate that we should write our model as
 
 $$ \verb!QA! = f(g(A, h(A)), h(A), D), $$
 
@@ -190,29 +195,29 @@ Hence, we cannot rely on randomized experiments to understand how to optimally h
 
 So what we are left with is continue doing what we do on the production floor, and use the production data generated under normal operating conditions (observational data) to estimate the impact of each production parameter individually on our quality score.
 
-To achieve this we need to rely on both our causal model (Figure 2) and a toolset from the field of causal inference called do-calculus.
+To achieve this we need to rely on both our causal model (Figure 3) and a toolset from the field of causal inference called do-calculus.
 
 ### Causal inference toolset: Do-calculus
 
 The components we have gathered so far are:
 
-- A causal model of our production floor (Figure 2), and
+- A causal model of our production floor (Figure 3), and
 - Lots of observational data of production parameter settings and measured resultant quality score $$\verb!QA!$$.
 
-Let us go through a thought experiment illustrated in the image below (Figure 3): How would the expected quality score $$\verb!QA!$$ change if our colleague in workstation $$B$$ chose their production parameter independently of their colleagues in workstations $$A$$ and $$C$$?
+Let us go through a thought experiment illustrated in the image below (Figure 4): How would the expected quality score $$\verb!QA!$$ change if our colleague in workstation $$B$$ chose their production parameter independently of their colleagues in workstations $$A$$ and $$C$$?
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 3: Theoretical randomized experiment where we advise our worker in workstation B to apply specific amounts of pressure 'b' instead of aligning their work with workstations A and C. When assigning parameter B independently from parameters A and C the causal links between these parameters is cut as is indicated by the missing arrows.")
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 4: Theoretical randomized experiment where we advise our worker in workstation B to apply specific amounts of pressure 'b' instead of aligning their work with workstations A and C. When assigning parameter B independently from parameters A and C the causal links between these parameters is cut as is indicated by the missing arrows.")
 
-This is what the notation in Figure 3 relates to: $$do(B = b)$$ describes a theoretical scenario where production parameter $$B$$ is assigned to hold value $$b$$ - instead of a scenario where parameter $$B$$ is observed to equal value $$b$$.
+This is what the notation in Figure 4 relates to: $$do(B = b)$$ describes a theoretical scenario where production parameter $$B$$ is assigned to hold value $$b$$ - instead of a scenario where parameter $$B$$ is observed to equal value $$b$$.
 
-Note the seemingly subtle but important difference: If we go back to our observational data generated under normal operating conditions then observing $$B = b$$ would imply something about production parameters $$A$$ and $$C$$ since, according to our causal model(Figure 2), these are causally connected!
+Note the seemingly subtle but important difference: If we go back to our observational data generated under normal operating conditions then observing $$B = b$$ would imply something about production parameters $$A$$ and $$C$$ since, according to our causal model(Figure 3), these are causally connected!
 However, forcing (or intervening on) parameter $$B$$ by setting it to value $$b$$ breaks that causal link between the workstations - and this is what the notation $$\verb!do!(B=b)$$ signifies.
 
 In essence $$\verb!do!(B=b)$$ would mean asking our colleague in workstation $$B$$ to stop listening to their colleagues in workstations $$A$$ and $$C$$.
 
 Since doing so in reality on the production floor would incur high cost due to lost production we simulate the intervention $$\verb!do!(B = b)$$!
 
-To simulate $$\verb!do!(B = b)$$ we apply a set of algebraic rules, called do-calculus, to our causal model from Figure 2 and draw on our regular observational data from the production floor.
+To simulate $$\verb!do!(B = b)$$ we apply a set of algebraic rules, called do-calculus, to our causal model from Figure 3 and draw on our regular observational data from the production floor.
 
 In technical terms, do-calculus allows us to turn theoretical interventional distributions into regular conditional distributions that we can compute using our observational data.
 
@@ -238,5 +243,5 @@ I would start with becoming a data-driven company first:
 Once you get to the point of wanting to make surgical decisions based on your machine learning model, causality and causal inference will start playing key roles.
 
 <a href="/images/posts/evolution_causality_driven_company.png" target="_blank">
-![Evolution of the causality-driven company](/images/posts/evolution_causality_driven_company.png "Figure 4: The evolution of the causality-driven company. Companies that can quantify their key operations are driven by data - companies that are able to surgically optimize their operations based both on data and a causal understanding of their operations are causality-driven. (Illustration based on Christoper Penn's illustration of the evolution of the data-driven company).")
+![Evolution of the causality-driven company](/images/posts/evolution_causality_driven_company.png "Figure 5: The evolution of the causality-driven company. Companies that can quantify their key operations are driven by data - companies that are able to surgically optimize their operations based both on data and a causal understanding of their operations are causality-driven. (Illustration based on Christoper Penn's illustration of the evolution of the data-driven company).")
 </a>

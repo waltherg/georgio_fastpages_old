@@ -42,7 +42,7 @@ Another key application in industry is smart manufacturing which promises to dec
 
 ### Product quality prediction
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_machine_learning.jpg "Figure 1: Production floor indicating production parameters A, B, C, and D alongside resultant quality score QA of items coming off the production line.")
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_machine_learning.jpg "Figure 1: Production floor indicating production parameters A, B, C, and D alongside resultant quality score QA of items coming off the production line. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 Consider our production line, pictured above in Figure 1, which consists of a number of workstations that the different parts of our product need to pass through before being assembled into our final product.
 
@@ -135,7 +135,7 @@ Unfortunately, this operation of tweaking and optimizing individual input variab
 
 In essence, our model learns the bulk relationship between the entire set of production parameters and quality score, and not the individual impact of each production parameter on the quality score - as illustrated in the following sketch:
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_bulk_parameters.jpg "Figure 2: We expect our machine learning model to learn the impact of each production parameter on the quality score QA individually - after all we write our model as a function f(a, b, c, d) with each parameter spelled out individually. However, what our machine learning model really learns is the bulk influence of our production parameters on quality score QA - essentially we learn the joint relationship between QA and a four-dimensional variable made up of our production parameters.")
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_bulk_parameters.jpg "Figure 2: We expect our machine learning model to learn the impact of each production parameter on the quality score QA individually - after all we write our model as a function f(a, b, c, d) with each parameter spelled out individually. However, what our machine learning model really learns is the bulk influence of our production parameters on quality score QA - essentially we learn the joint relationship between QA and a four-dimensional variable made up of our production parameters. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 This problem pertains to most machine learning models independent of the specific problem tackled.
 
@@ -159,7 +159,7 @@ From them we learn that:
 
 Armed with these insights from our production floor we draw up the following causal model - showing the connections among our production parameters and the quality score of our product:
 
-![Smart manufacturing with machine learning: expected of model and provided by model.](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 3: Production line with causal links between production parameters indicated by arrows. Production parameters are linked due to practical considerations and the experience of production floor workers. Note: This kind of graph is referred to as a causal model.")
+![Smart manufacturing with machine learning: expected of model and provided by model.](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 3: Production line with causal links between production parameters indicated by arrows. Production parameters are linked due to practical considerations and the experience of production floor workers. Note: This kind of graph is referred to as a causal model. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 A simplistic, and perhaps crude, way of interpreting the arrows between parameters $$A$$, $$B$$, and $$C$$ is to imagine these arrows were unidirectional mechanical springs.
 If I pull on parameter $$A$$ by changing it somehow, I also move around parameters $$B$$ and $$C$$ - however pulling on $$C$$ does not affect $$A$$ as our spring is unidirectional.
@@ -205,7 +205,7 @@ The components we have gathered so far are:
 
 Let us go through a thought experiment illustrated in the image below (Figure 4): How would the expected quality score $$\verb!QA!$$ change if our colleague in workstation $$B$$ chose their production parameter independently of their colleagues in workstations $$A$$ and $$C$$?
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 4: Theoretical randomized experiment where we advise our worker in workstation B to apply specific amounts of pressure 'b' instead of aligning their work with workstations A and C. When assigning parameter B independently from parameters A and C the causal links between these parameters is cut as is indicated by the missing arrows.")
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 4: Theoretical randomized experiment where we advise our worker in workstation B to apply specific amounts of pressure 'b' instead of aligning their work with workstations A and C. When assigning parameter B independently from parameters A and C the causal links between these parameters is cut as is indicated by the missing arrows. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 This is what the notation in Figure 4 relates to: $$do(B = b)$$ describes a theoretical scenario where production parameter $$B$$ is assigned to hold value $$b$$ - instead of a scenario where parameter $$B$$ is observed to equal value $$b$$.
 

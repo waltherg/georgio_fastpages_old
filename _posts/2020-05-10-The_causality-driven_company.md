@@ -12,18 +12,16 @@ image: images/posts/evolution_causality_driven_company.png
 
 ## The data-driven company
 
-Much has been written on data being the new gold and enterprises needing to embrace big data and machine learning, enabling enterprises in three important ways:
+Much has been written on data being the new oil and enterprises needing to embrace big data and machine learning to benefit in three important ways:
 
 1. Utilizing existing resources more efficiently thus reducing cost,
 2. Increasing success rates thus increasing revenue, and
-3. Developing entirely new business models thus diversifying their business.
+3. Developing entirely new revenue streams thus diversifying their business.
 
 Enterprises are said to be data-driven once their entire organization is data-first, meaning:
 
-1. Both their core processes (e.g. production lines) and supporting processes (e.g. recruiting) are quantifiable,
-2. Business and unit performance is quantifiable with transparent metrics,
-3. All business units have a data mindset, i.e. are driven by testable hypotheses and have the technological means to do so, and
-4. The entire organization, top to bottom, embraces measurability and hypothesis-driven progress.
+1. Both their core processes (e.g. production lines) and supporting processes (e.g. recruiting) are quantifiable through transparent metrics, and
+2. All business units have a data mindset, i.e. are driven by testable hypotheses, and have the technological means for it.
 
 ## Machine learning applications for the data-driven company
 
@@ -50,8 +48,8 @@ The various workstations can be described by parameters, e.g. how much pressure 
 
 Our fictional production line above has four production parameters spread across its workstations: $$A$$, $$B$$, $$C$$, and $$D$$.
 
-At the far end of our production the quality of our assembled product is quantified in the quality assurance gateway ($$\verb!QA!$$).
-Here, either an employee or a machine visually inspects or physically tests our product to gauge its quality.
+At the far end of our production line the quality of our assembled product is quantified in the quality assurance gateway ($$\verb!QA!$$).
+Here, either an employee or a machine visually inspects or physically tests manufactured items to verify their quality before they are shipped to customers.
 
 Since our company is data-driven we collect data on every item coming off our production line. Such a data set may look as follows:
 
@@ -68,9 +66,9 @@ Parameters $$A$$ and $$B$$ of our production line are numerical features while p
 Our quality measurement $$\verb!QA!$$ is a numerical target variable which takes values between 0 and 1 with the latter representing the highest possible product quality.
 
 Provided that we collect enough production line data, machine learning offers a rich toolbox for predicting the expected $$\verb!QA!$$ score or whether our $$\verb!QA!$$ score will lie above a certain threshold.
-The former application is called regression while the latter is called classification.
+The former application is called regression (predict $$\verb!QA!$$ value) while the latter is called classification (predict if $$\verb!QA!$$ is greater than a threshold).
 
-Machine learning models at our disposal in our toolbox include:
+To implement these applications there are numerous established machine learning models, some of which are:
 
 - Linear and polynomial regression,
 - (Deep) neural networks / deep learning,
@@ -81,9 +79,9 @@ Machine learning models at our disposal in our toolbox include:
 - Gaussian processes, and
 - Naive Bayes.
 
-These machine learning models allow us to learn the, potentially, highly complex relationship between production line parameters $$A$$, $$B$$, $$C$$, and $$D$$ and product quality, $$\verb!QA!$$.
+These machine learning models allow us to learn the potentially complex relationship between our production line parameters ($$A$$, $$B$$, $$C$$, and $$D$$) and resultant product quality ($$\verb!QA!$$).
 
-These are also the same models used routinely to implement the aforementioned industry applications such as demand forecasting or churn prediction.
+These are also the same machine learning models used routinely to implement the other aforementioned industry applications such as demand forecasting or churn prediction.
 
 So training a machine learning model on our production line data we get something like this:
 
@@ -95,7 +93,7 @@ Where our model predicts the quality of our final product based on the parameter
 
 Imagine we manage to train a highly accurate machine learning model on our production line data - what do we do with it?
 
-Sure, if measuring the quality of our product ($$\verb!QA!$$) is prohibitively expensive we could cut cost and just use our model to determine the quality score for items coming off our production line.
+Sure, if measuring the quality of our product ($$\verb!QA!$$) is prohibitively expensive we could cut cost by using our model to determine the quality score for items coming off our production line.
 
 We could also try and adapt our model so that it provides accurate quality score predictions early in the production cycle for a given item - thus allowing us to cancel work on substandard items before they consume resources unnecessarily.
 
@@ -105,8 +103,8 @@ How should we tweak individual production parameters to increase product quality
 
 ### Issue with our prediction model
 
-Unfortunately, our machine learning model does not hold the answer to our core question -
-out of the box it will not help us optimize individual production parameters to improve our quality score.
+Unfortunately, our machine learning model does not hold the answer to our core question:
+Out of the box it will not help us optimize individual production parameters to improve our quality score $$\verb!QA!$$.
 
 Let's see why that is.
 
@@ -117,9 +115,9 @@ $$ \verb!QA! = f(A, B, C, D), $$
 where $$ f $$ is our model that predicts the quality score for items manufactured with production parameters
 $$A$$, $$B$$, $$C$$, and $$D$$.
 
-The issue with this model is that it learns the relationship between quality score and production parameters "in bulk" - or the conditional distribution of $$\verb!QA!$$ jointly on production parameters $$A$$, $$B$$, $$C$$, and $$D$$.
+The issue with this model is that it learns the relationship between quality score and production parameters "in bulk" - or in other words the conditional distribution of $$\verb!QA!$$ jointly on production parameters $$A$$, $$B$$, $$C$$, and $$D$$.
 
-The only sensible operation we can carry out with this model is asking all production line workers for their presently (or planned) production parameter values, inputting them into our model, and informing our colleagues in production of the expected quality score.
+The only sensible operation we can carry out with this model is asking all production line workers for their presently (or planned) production parameter values, inputting them into our model, and informing our colleagues in production of the quality score we expect to achieve with their configuration.
 
 Of course, a far more desirable operation would be to take the presently used production parameters, e.g.
 
@@ -135,11 +133,11 @@ Unfortunately, this operation of tweaking and optimizing individual input variab
 
 In essence, our model learns the bulk relationship between the entire set of production parameters and quality score, and not the individual impact of each production parameter on the quality score - as illustrated in the following sketch:
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_bulk_parameters.jpg "Figure 2: We expect our machine learning model to learn the impact of each production parameter on the quality score QA individually - after all we write our model as a function f(a, b, c, d) with each parameter spelled out individually. However, what our machine learning model really learns is the bulk influence of our production parameters on quality score QA - essentially we learn the joint relationship between QA and a four-dimensional variable made up of our production parameters. (Original photo by Birmingham Museums Trust on Unsplash)")
+![Smart manufacturing with machine learning: Expected of and provided by machine learning model.](/images/posts/smart_manufacturing_bulk_parameters.jpg "Figure 2: We expect our machine learning model to learn the impact of each production parameter on the quality score QA individually - after all we write our model as a function f(a, b, c, d) with each parameter spelled out individually. However, what our machine learning model really learns is the bulk influence of our production parameters on quality score QA - essentially we learn the joint relationship between QA and a four-dimensional variable made up of our production parameters. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 This problem pertains to most machine learning models independent of the specific problem tackled.
 
-How do we modify our machine learning model so that we can estimate the impact of individual production parameter modifications and help our colleagues on the production floor make optimal, surgical changes to their manufacturing process?
+How do we modify our approach so that we can estimate the impact of individual production parameter modifications and help our colleagues on the production floor make optimal, surgical changes to their manufacturing process?
 
 One major piece to closing this gap is causality.
 
@@ -149,8 +147,8 @@ One major piece to closing this gap is causality.
 
 To disentangle their individual contributions, we first need to account for how our production parameters influence one another and the quality score.
 
-To understand the connections between the parameters of our production line and the quality score we pop down to the production floor and chat with our colleagues manning the individual workstations.
-From them we learn that:
+To understand the connections between our production parameters and the quality score, we pop down to the production floor and chat with our colleagues manning the individual workstations.
+From them we learn:
 
 - When the stiffness of the raw material (A) increases then downstream workers increase the pressure applied on the item (B),
 - Depending on the stiffness of the raw material (A) the type of downstream drill (C) is chosen,
@@ -159,16 +157,16 @@ From them we learn that:
 
 Armed with these insights from our production floor we draw up the following causal model - showing the connections among our production parameters and the quality score of our product:
 
-![Smart manufacturing with machine learning: expected of model and provided by model.](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 3: Production line with causal links between production parameters indicated by arrows. Production parameters are linked due to practical considerations and the experience of production floor workers. Note: This kind of graph is referred to as a causal model. (Original photo by Birmingham Museums Trust on Unsplash)")
+![Smart manufacturing causal model.](/images/posts/smart_manufacturing_causal_inference.jpg "Figure 3: Production line with causal links between production parameters indicated by arrows. Production parameters are linked due to practical considerations and the experience of production floor workers. Note: This kind of graph is referred to as a causal model. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 A simplistic, and perhaps crude, way of interpreting the arrows between parameters $$A$$, $$B$$, and $$C$$ is to imagine these arrows were unidirectional mechanical springs.
-If I pull on parameter $$A$$ by changing it somehow, I also move around parameters $$B$$ and $$C$$ - however pulling on $$C$$ does not affect $$A$$ as our spring is unidirectional.
+If I pull on parameter $$A$$ by changing it somehow, I also move around parameters $$B$$ and $$C$$ - however pulling on $$C$$ does not affect $$A$$ as that spring is unidirectional.
 
 ### Interconnected variables are hard to disentangle
 
-One of our main uses for a machine learning model that predicts the eventual quality score of manufactured items is to support our colleagues on the production floor in optimizing their individual production parameters to maximize our overall output quality.
+To reiterate, our main use for a machine learning model that predicts the quality score of manufactured items is to support our colleagues on the production floor in optimizing individual production parameters to maximize our overall output quality.
 
-However, our causal model (Figure 3) makes it apparent that our model should be a lot more complex that previously thought. The connections in our causal model indicate that we should write our model as
+Our causal model (Figure 3) makes it apparent that our model should be more complex than previously thought. The connections in our causal model indicate that we should write our model as
 
 $$ \verb!QA! = f(g(A, h(A)), h(A), D), $$
 
@@ -178,9 +176,10 @@ $$ B = g(A, C), C = h(A) $$.
 
 In short: In addition to teaching our machine learning model the relationship between our four production parameters and the quality score, we also need to teach our model the various relationships between our production parameters before we can use our model to optimize individual workstations.
 
-Now, we may be inclined to just go down to the production floor and start experimenting at random with our production parameters generating enough data to learn both the interconnections between the production parameters ($$B = g(A, C)$$, $$C = h(A)$$) and their individual impact on our quality score $$\verb!QA!$$.
+To learn all these relationships we need a lot of data and variation in production parameters that show how the parameters influence one another.
+We may be inclined to go down to the manufacturing floor and start experimenting at random with our production parameters generating enough data to learn both the interconnections between the production parameters ($$B = g(A, C)$$, $$C = h(A)$$) and their individual impact on our quality score $$\verb!QA!$$.
 
-However, each manufactured item with substandard quality due to a randomly selected combination of production parameters means money lost for your company.
+However, each manufactured item with substandard quality due to a randomly selected combination of production parameters means money lost for our company.
 
 This approach, called randomized experiment or randomized controlled trial, is oftentimes undesirable or simply infeasible:
 
@@ -205,16 +204,16 @@ The components we have gathered so far are:
 
 Let us go through a thought experiment illustrated in the image below (Figure 4): How would the expected quality score $$\verb!QA!$$ change if our colleague in workstation $$B$$ chose their production parameter independently of their colleagues in workstations $$A$$ and $$C$$?
 
-![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 4: Theoretical randomized experiment where we advise our worker in workstation B to apply specific amounts of pressure 'b' instead of aligning their work with workstations A and C. When assigning parameter B independently from parameters A and C the causal links between these parameters is cut as is indicated by the missing arrows. (Original photo by Birmingham Museums Trust on Unsplash)")
+![Smart manufacturing with machine learning](/images/posts/smart_manufacturing_intervention.jpg "Figure 4: Theoretical randomized experiment where we advise our worker in workstation B to apply specific amounts of pressure 'b' instead of aligning their work with workstations A and C. When assigning parameter B independently from parameters A and C the causal links between these parameters is broken as is indicated by the missing arrows. (Original photo by Birmingham Museums Trust on Unsplash)")
 
 This is what the notation in Figure 4 relates to: $$do(B = b)$$ describes a theoretical scenario where production parameter $$B$$ is assigned to hold value $$b$$ - instead of a scenario where parameter $$B$$ is observed to equal value $$b$$.
 
-Note the seemingly subtle but important difference: If we go back to our observational data generated under normal operating conditions then observing $$B = b$$ would imply something about production parameters $$A$$ and $$C$$ since, according to our causal model(Figure 3), these are causally connected!
+Note the seemingly subtle but important difference: If we go back to our observational data generated under normal operating conditions then observing $$B = b$$ implies something about production parameters $$A$$ and $$C$$ since, according to our causal model (Figure 3), these are causally connected!
 However, forcing (or intervening on) parameter $$B$$ by setting it to value $$b$$ breaks that causal link between the workstations - and this is what the notation $$\verb!do!(B=b)$$ signifies.
 
 In essence $$\verb!do!(B=b)$$ would mean asking our colleague in workstation $$B$$ to stop listening to their colleagues in workstations $$A$$ and $$C$$.
 
-Since doing so in reality on the production floor would incur high cost due to lost production we simulate the intervention $$\verb!do!(B = b)$$!
+Since doing so in reality on the production floor would incur high cost due to lost production we simulate the intervention $$\verb!do!(B = b)$$! using the observational data we collect under normal operating conditions anyway.
 
 To simulate $$\verb!do!(B = b)$$ we apply a set of algebraic rules, called do-calculus, to our causal model from Figure 3 and draw on our regular observational data from the production floor.
 
@@ -224,16 +223,20 @@ With this toolset we can finally estimate the individual effect of tweaking prod
 
 ## Becoming a causality-driven company
 
-I hope I managed to convince you of the important difference between recording lots of data and being able to optimize individual steps of your business operations based on those data.
+I hope I managed to convince you of the important difference between recording lots of data and being able to optimize individual steps of your business operations based on your data.
 
-The former implies being able to predict, and optimize, business outcomes if the web of decisions or variables leading to those outcomes are operated as usual - this is the essence of the data-driven company.
+The former is limited to prediction: Your organization can predict future outcomes if all internal processes continue to be operated as usual.
+This is the essence of the data-driven company.
 
-The latter implies being able to predict the impact of changes to the status quo of your business decisions and operations.
+The latter adds explanation to prediction: Your organization can explain how outcomes and future outcomes come about. And once you can explain how your processes lead to outcomes you can start optimizing individual components of your processes and organization.
 This enables you to analyze what would happen if you changed "the way you have always done things" - thus elevating you to a causality-driven company.
 
-How can you start using causal inference and do-calculus to optimize your business - and how do you eventually become a causality-driven company?
+How can you start using causal inference and tools such as do-calculus to optimize your business?
+And how do you eventually become a causality-driven company?
 
-I would start with becoming a data-driven company first:
+A roadmap of this kind, a causality strategy if you will, would certainly be an interesting subject for another blog article.
+
+Until then, I would start by becoming a data-driven company first:
 
 - Set up data collection across all key operations of your business,
 - Start working on machine learning prototypes for predicting key business metrics based on your collected data, and
@@ -242,5 +245,5 @@ I would start with becoming a data-driven company first:
 Once you get to the point of wanting to make surgical decisions based on your machine learning model, causality and causal inference will start playing key roles.
 
 <a href="/images/posts/evolution_causality_driven_company.png" target="_blank">
-![Evolution of the causality-driven company](/images/posts/evolution_causality_driven_company.png "Figure 5: The evolution of the causality-driven company. Companies that can quantify their key operations are driven by data - companies that are able to surgically optimize their operations based both on data and a causal understanding of their operations are causality-driven. (Illustration based on Christoper Penn's illustration of the evolution of the data-driven company).")
+![Evolution of the causality-driven company](/images/posts/evolution_causality_driven_company.png "Figure 5: The evolution of the causality-driven company. Companies that can quantify and predict their key operations are driven by data alone. Oftentimes, data-driven companies are limited to predictions in the realm of their established processes. Companies that can both predict and explain are able to surgically optimize their operations or products. These causality-driven companies can break open and optimize their established (status quo) processes based both on data and a causal understanding of their operations. (Illustration based on Christoper Penn's illustration of the evolution of the data-driven company).")
 </a>
